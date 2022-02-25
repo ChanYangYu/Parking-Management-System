@@ -8,7 +8,6 @@
 int main()
 { 
   key_t key;
-  int msgtype = 3;
   struct msgbuf mybuf;
   
   if(init(&key)){
@@ -21,12 +20,26 @@ int main()
   while(1){
     memset(&mybuf, 0, sizeof(struct msgbuf));
 
-    if(receive_sync(key, &mybuf, msgtype) == -1){
+    if(receive_sync(key, &mybuf, MSG_TYPE) == -1){
       fprintf(stderr,"Error: receive_sync() error\n");
       exit(1);
     }
 
-    printf("recieve msg : %s [%d]\n", mybuf.msg, mybuf.seq);
+    if(mybuf.in_out == 0){
+      printf("[OUT] %s\n", mybuf.number);
+      
+      // 주차요금 정산
+      mybuf.cost = 9000;
+      mybuf.msgtype = 4;
+      if(send(key, &mybuf) == -1){
+        fprintf(stderr,"Error: send() error\n");
+        exit(1);
+      }
+    }
+    else if(mybuf.in_out == 1){
+      printf("[In] %s\n", mybuf.number);
+    }
+
     sleep(1);
   }
 

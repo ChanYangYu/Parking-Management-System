@@ -18,7 +18,6 @@ struct msgbuf
 
 // Function
 int init(key_t *k);
-int check_queue();
 int send(key_t key, struct msgbuf *buf);
 int receive_sync(key_t key, struct msgbuf* buf, int msgtype);
 int receive_async(key_t key, struct msgbuf* buf, int msgtype);

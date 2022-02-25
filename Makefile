@@ -2,10 +2,10 @@ all: server client
 GCC=gcc
 CFLAGS= -Wall -c -g
 
-server: server.o
+server: server.o _ipc.o
 	$(CC) -o $@ $^
 
-client: client.o
+client: client.o _ipc.o
 	$(CC) -o $@ $^
 
 .c.o:

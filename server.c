@@ -19,9 +19,22 @@ int main()
 
   while(1){
     memset(&mybuf, 0, sizeof(struct msgbuf));
+    // Lock
+    if(receive_sync(key, &mybuf, 5) == -1){
+      fprintf(stderr,"Error: receive_sync() : 4 error\n");
+      exit(1);
+    }
 
+    // wake up Client
+    mybuf.msgtype = 6;
+    if(send(key, &mybuf) == -1){
+        fprintf(stderr,"Error: send() error\n");
+        exit(1);
+      }
+
+    // Request Listen
     if(receive_sync(key, &mybuf, MSG_TYPE) == -1){
-      fprintf(stderr,"Error: receive_sync() error\n");
+      fprintf(stderr,"Error: receive_sync() : 3 error\n");
       exit(1);
     }
 

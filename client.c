@@ -8,6 +8,21 @@ void get_number(struct msgbuf *mybuf);
 void in_car(key_t k, struct msgbuf *mybuf);
 void out_car(key_t k, struct msgbuf *mybuf);
 
+void waiting(key_t k, struct msgbuf *mybuf){
+  mybuf->msgtype = 5;
+
+  printf("잠시만 기다려주세요...\n");
+  if(send(k, mybuf) == -1){
+    fprintf(stderr,"Error: send() error\n");
+    exit(1);
+  }
+
+   if(receive_sync(k, mybuf, 6) == -1){
+    fprintf(stderr,"Error: receive_sync() error\n");
+    exit(1);
+  }
+}
+
 void get_number(struct msgbuf *mybuf){
   printf("차량번호 : ");
   scanf("%s", mybuf->number); 
@@ -60,6 +75,8 @@ int main()
     scanf("%d", &button);
 
     system("clear");
+    waiting(key, &mybuf);
+    
     switch(button){
       case 1: in_car(key, &mybuf);break;
       case 2: out_car(key, &mybuf);break;

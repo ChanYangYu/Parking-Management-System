@@ -5,55 +5,59 @@
 #include <unistd.h>
 #include "_ipc.h"
 
+Register register_buf;
+MyState state_buf;
+Manage manage_buf;
+key_t key;
+
+void process_register(){
+  if(msgrcv(key, (void *)&register_buf, sizeof(Register), MSG_REGISTER_REQ, IPC_NOWAIT) != -1){
+    printf("[Register]\n");
+    
+    // 임시값 적용
+    state_buf.user_key = 5;
+    state_buf.msgtype = MSG_REGISTER_RES;
+    state_buf.errno = REQ_SUCCESS;
+    
+    if(msgsnd(key, (void*)&state_buf, sizeof(MyState), IPC_NOWAIT) == -1){
+      fprintf(stderr,"Error: msgsnd() error\n");
+      exit(1);
+    }
+  }
+}
+
+void process_update(){
+  if(msgrcv(key, (void *)&register_buf, sizeof(Register), MSG_UPDATE_REQ, IPC_NOWAIT) != -1){
+    printf("[Update]\n");
+    
+    register_buf.errno = REQ_SUCCESS;
+    register_buf.msgtype = MSG_UPDATE_RES;
+    
+    if(msgsnd(key, (void*)&register_buf, sizeof(Register), IPC_NOWAIT) == -1){
+      fprintf(stderr,"Error: msgsnd() error\n");
+      exit(1);
+    }
+  }
+}
+
 int main()
 { 
-  key_t key;
-  struct msgbuf mybuf;
-  
-  if(init(&key)){
-    fprintf(stderr,"Error: init() error\n");
+  if((key = msgget((key_t)MSG_QUEUE_KEY, IPC_CREAT | MSG_PERM)) == -1){
+    fprintf(stderr,"Error: msgget() error\n");
     exit(1);
   }
 
   printf("Key is %d\n", key);
 
   while(1){
-    memset(&mybuf, 0, sizeof(struct msgbuf));
-    // Lock
-    if(receive_sync(key, &mybuf, 5) == -1){
-      fprintf(stderr,"Error: receive_sync() : 4 error\n");
-      exit(1);
-    }
+    memset(&register_buf, 0, sizeof(Register));
+    memset(&state_buf, 0, sizeof(MyState));
+    memset(&manage_buf, 0, sizeof(Manage));
 
-    // wake up Client
-    mybuf.msgtype = 6;
-    if(send(key, &mybuf) == -1){
-        fprintf(stderr,"Error: send() error\n");
-        exit(1);
-      }
+    process_register();
+    process_update();
 
-    // Request Listen
-    if(receive_sync(key, &mybuf, MSG_TYPE) == -1){
-      fprintf(stderr,"Error: receive_sync() : 3 error\n");
-      exit(1);
-    }
-
-    if(mybuf.in_out == 0){
-      printf("[OUT] %s\n", mybuf.number);
-      
-      // 주차요금 정산
-      mybuf.cost = 9000;
-      mybuf.msgtype = 4;
-      if(send(key, &mybuf) == -1){
-        fprintf(stderr,"Error: send() error\n");
-        exit(1);
-      }
-    }
-    else if(mybuf.in_out == 1){
-      printf("[In] %s\n", mybuf.number);
-    }
-
-    sleep(1);
+    usleep(200000);
   }
 
   return 0;

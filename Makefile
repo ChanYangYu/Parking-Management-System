@@ -1,15 +1,17 @@
-all: server client
+all: server client manager
 GCC=gcc
 CFLAGS= -Wall -c -g
 
-server: server.o _ipc.o
+server: server.o
 	$(CC) -o $@ $^
 
-client: client.o _ipc.o
+client: client.o
 	$(CC) -o $@ $^
 
+manager: manager.o
+	$(CC) -o $@ $^
 .c.o:
 	$(CC) $(CFLAGS) $<
 
 clean:
-	rm -r *.o server client
+	rm -r *.o server client manager

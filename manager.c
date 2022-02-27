@@ -8,23 +8,22 @@ Register register_buf;
 MyState state_buf;
 key_t key;
 
-void register_user(){
-  
-  register_buf.msgtype = MSG_REGISTER_REQ;
+void update_user(){
+  register_buf.msgtype = MSG_UPDATE_REQ;
   if(msgsnd(key, (void *)&register_buf, sizeof(Register), 0) == -1){
     fprintf(stderr,"Error: msgsnd() error\n");
     exit(1);
   }
 
-  if(msgrcv(key, (void *)&state_buf, sizeof(MyState), MSG_REGISTER_RES, 0) == -1){
+  if(msgrcv(key, (void *)&register_buf, sizeof(Register), MSG_UPDATE_RES, 0) == -1){
     fprintf(stderr,"Error: msgrcv() error\n");
     exit(1);
   }
 
   if(state_buf.errno == REQ_SUCCESS)
-    printf("Register Success\n");
+    printf("Update Success\n");
   else
-    printf("Register Fail\n");
+    printf("Update Fail\n");
 }
 
 int main()
@@ -38,7 +37,7 @@ int main()
 
   while(1){
     int button;
-    printf("1. 입차\n2. 출차\n3. 등록\n: ");
+    printf("1. 주차현황\n2. 이력조회\n3. 업데이트\n: ");
     scanf("%d", &button);
 
     system("clear");
@@ -46,7 +45,7 @@ int main()
     switch(button){
       case 1: break;
       case 2: break;
-      case 3: register_user();break;
+      case 3: update_user();break;
       default: fprintf(stderr, "Error : 잘못입력하셨습니다.\n");break;
     }
   }

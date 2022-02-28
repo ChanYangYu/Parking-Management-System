@@ -24,6 +24,16 @@
 #define MSG_REGISTER_RES 2
 #define MSG_UPDATE_REQ 3
 #define MSG_UPDATE_RES 4
+#define MSG_LISTUP_ALL_REQ 5
+#define MSG_LISTUP_ALL_RES 6 
+#define MSG_LISTUP_PRE_REQ 7
+#define MSG_LISTUP_PRE_RES 8
+#define MSG_CAR_IN_REQ 9
+#define MSG_CAR_IN_RES 10
+#define MSG_CAR_OUT_REQ 11
+#define MSG_CAR_OUT_RES 12
+#define MSG_FIND_CAR_REQ 13
+#define MSG_FIND_CAR_RES 14
 
 // Status code
 #define REQ_SUCCESS 0
@@ -34,7 +44,7 @@ typedef struct Register{
     char name[NAME_SIZE]; //이름
     char car_number[CAR_NUMBER_SIZE]; //자동차 번호
     char phone_number[PHONE_NUMBER_SIZE]; //전화번호
-    int is_residents; //입주민 여부
+    int is_resident; //입주민 여부
     int errno; //에러코드
 } Register;
 
@@ -46,6 +56,7 @@ typedef struct MyState {
     bool state; //주차여부
     char map[MAP_SIZE]; //주차위치
     time_t unixtime; //입차시간
+    int cost;
     int errno; //에러코드
 } MyState;
 

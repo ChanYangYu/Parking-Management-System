@@ -13,9 +13,8 @@ JSON_Value* root_value;
 
 void process_register(key_t msg_key);
 void process_update(key_t msg_key);
-void process_listup(key_t msg_key);
 void process_listup_all(key_t msg_key);
-void process_listup_pre(key_t msg_key);
+void process_listup_pending(key_t msg_key);
 
 int main()
 { 
@@ -35,6 +34,8 @@ int main()
 
     process_register(msg_key);
     process_update(msg_key);
+    process_listup_all(msg_key);
+    process_listup_pending(msg_key);
 
     usleep(200000);
   }
@@ -75,7 +76,10 @@ void process_listup_all(key_t msg_key){
   if(msgrcv(msg_key, (void *)&manage_buf, sizeof(Manage), MSG_LISTUP_ALL_REQ, IPC_NOWAIT) != -1){
     printf("[Listup-All]\n");
     
-    manage_buf.errno = REQ_SUCCESS;
+    if(make_user_list(root_value, manage_buf.response, 0) == -1)
+      manage_buf.errno = REQ_FAIL;
+    else
+      manage_buf.errno = REQ_SUCCESS;
     manage_buf.msgtype = MSG_LISTUP_ALL_RES;
     
     if(msgsnd(msg_key, (void*)&manage_buf, sizeof(Manage), IPC_NOWAIT) == -1){
@@ -85,12 +89,15 @@ void process_listup_all(key_t msg_key){
   }
 }
 
-void process_listup_pre(key_t msg_key){
-  if(msgrcv(msg_key, (void *)&manage_buf, sizeof(Manage), MSG_LISTUP_PRE_REQ, IPC_NOWAIT) != -1){
+void process_listup_pending(key_t msg_key){
+  if(msgrcv(msg_key, (void *)&manage_buf, sizeof(Manage), MSG_LISTUP_PEN_REQ, IPC_NOWAIT) != -1){
     printf("[Listup-Pre]\n");
     
-    manage_buf.errno = REQ_SUCCESS;
-    manage_buf.msgtype = MSG_LISTUP_PRE_RES;
+    if(make_user_list(root_value, manage_buf.response, 1) == -1)
+      manage_buf.errno = REQ_FAIL;
+    else
+      manage_buf.errno = REQ_SUCCESS;
+    manage_buf.msgtype = MSG_LISTUP_PEN_RES;
     
     if(msgsnd(msg_key, (void*)&manage_buf, sizeof(Manage), IPC_NOWAIT) == -1){
       fprintf(stderr,"Error: msgsnd() error\n");

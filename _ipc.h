@@ -3,7 +3,6 @@
 #include <sys/ipc.h>
 #include <sys/msg.h>
 #include <sys/stat.h>
-#include <stdbool.h>
 
 // Size
 #define NAME_SIZE 64
@@ -11,6 +10,7 @@
 #define PHONE_NUMBER_SIZE 16
 #define MAP_SIZE 1024
 #define RESPONSE_SIZE 2048
+#define BUFFER_SIZE 256
 
 // MessageQueue Constants
 #define MSG_NUMBER_LEN 256
@@ -26,8 +26,8 @@
 #define MSG_UPDATE_RES 4
 #define MSG_LISTUP_ALL_REQ 5
 #define MSG_LISTUP_ALL_RES 6 
-#define MSG_LISTUP_PRE_REQ 7
-#define MSG_LISTUP_PRE_RES 8
+#define MSG_LISTUP_PEN_REQ 7
+#define MSG_LISTUP_PEN_RES 8
 #define MSG_CAR_IN_REQ 9
 #define MSG_CAR_IN_RES 10
 #define MSG_CAR_OUT_REQ 11
@@ -53,7 +53,7 @@ typedef struct MyState {
     long msgtype; //메세지 타입
     int user_key; //key
     char car_number[CAR_NUMBER_SIZE]; //자동차번호
-    bool state; //주차여부
+    int state; //주차여부
     char map[MAP_SIZE]; //주차위치
     time_t unixtime; //입차시간
     int cost;

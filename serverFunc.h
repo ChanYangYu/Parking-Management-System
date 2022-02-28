@@ -6,5 +6,6 @@
 
 int add_user(Register register_buf, JSON_Value* root_value);
 int update_user(Register register_buf, JSON_Value* root_value);
+int make_user_list(JSON_Value* root_value, char* response, int flag);
 
 #endif

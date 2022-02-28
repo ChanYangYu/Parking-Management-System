@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include "serverFunc.h"
 
 // 유저 등록 함수: key값 리턴
@@ -37,11 +38,51 @@ int update_user(Register register_buf, JSON_Value* root_value){
     if(!strcmp(json_object_get_string(user_object, "carNumber"), register_buf.car_number))
     {
       json_object_set_number(user_object, "isResident", register_buf.is_resident);
+      json_serialize_to_file_pretty(root_value, "users.json");
       return REQ_SUCCESS;
     }
   }
   return REQ_FAIL;
 }
 
+// 유저 리스트업 문자열 리턴 함수
+int make_user_list(JSON_Value* root_value, char* response, int flag){
+  char line[BUFFER_SIZE];
+  char name[NAME_SIZE];
+  char car_number[CAR_NUMBER_SIZE];
+  char phone_number[PHONE_NUMBER_SIZE];
+  int is_resident;
+  int i, size;
+  char resident_state[3][NAME_SIZE] = {"외부인", "검토중", "입주민"};
+  JSON_Object* root_object = json_value_get_object(root_value);
+  JSON_Array* user_array = json_object_get_array(root_object, "users");
+  
+  size = json_array_get_count(user_array);
+  if(size == 0)
+    return -1;
+  
+  memset(response, 0, sizeof(RESPONSE_SIZE));
+  strcat(response, "이름\t차량번호\t연락처\t\t입주자 여부\n");
+  for(i = 0; i < size; i++){
+    JSON_Value *user_value = json_array_get_value(user_array, i);
+    JSON_Object *user_object = json_value_get_object(user_value);
+    
+    strcpy(name, json_object_get_string(user_object, "name"));
+    strcpy(car_number, json_object_get_string(user_object, "carNumber"));
+    strcpy(phone_number, json_object_get_string(user_object, "phoneNumber"));
+
+    
+    is_resident = (int)json_object_get_number(user_object, "isResident");
+    sprintf(line,"%s\t%s\t%s\t%s\n", name, car_number, phone_number, resident_state[is_resident]);
+    // All
+    if(flag == 0)
+      strcat(response, line);
+    // Pending
+    else if(flag == 1 && is_resident == 2)
+      strcat(response, line);
+  }
+
+  return 0;
+}
 
 

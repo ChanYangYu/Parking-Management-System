@@ -4,17 +4,21 @@
 #include <signal.h>
 #include <unistd.h>
 #include "_ipc.h"
+#include "_linkedList.h"
 #include "serverFunc.h"
 
 Register register_buf;
 MyState state_buf;
 Manage manage_buf;
 JSON_Value* root_value;
+LinkedList* head;
 
 void process_register(key_t msg_key);
 void process_update(key_t msg_key);
 void process_listup_all(key_t msg_key);
 void process_listup_pending(key_t msg_key);
+void process_in(key_t msg_key);
+void process_out(key_t msg_key);
 
 int main()
 { 
@@ -25,6 +29,7 @@ int main()
   }
 
   root_value = json_parse_file("users.json");
+  head = NULL;
   printf("Key is %d\n", msg_key);
 
   while(1){
@@ -36,6 +41,8 @@ int main()
     process_update(msg_key);
     process_listup_all(msg_key);
     process_listup_pending(msg_key);
+    process_in(msg_key);
+    process_out(msg_key);
 
     usleep(200000);
   }
@@ -110,7 +117,14 @@ void process_in(key_t msg_key){
   if(msgrcv(msg_key, (void *)&state_buf, sizeof(MyState), MSG_CAR_IN_REQ, IPC_NOWAIT) != -1){
     printf("[Car-In]\n");
     
-    state_buf.errno = REQ_SUCCESS;
+    if(insert_node(&head, &state_buf) == 0){
+      state_buf.errno = REQ_SUCCESS;
+      get_car_number(root_value, &state_buf);
+      record_log(state_buf.car_number, 0);
+      //todo: state_buf->map 업데이트
+    }
+    else
+      state_buf.errno = REQ_FAIL;
     state_buf.msgtype = MSG_CAR_IN_RES;
     
     if(msgsnd(msg_key, (void*)&state_buf, sizeof(MyState), IPC_NOWAIT) == -1){
@@ -124,7 +138,14 @@ void process_out(key_t msg_key){
   if(msgrcv(msg_key, (void *)&state_buf, sizeof(MyState), MSG_CAR_OUT_REQ, IPC_NOWAIT) != -1){
     printf("[Car-Out]\n");
     
-    state_buf.errno = REQ_SUCCESS;
+    if(delete_node(&head, &state_buf) == 0){
+      state_buf.errno = REQ_SUCCESS;
+      calc_fee(root_value, &state_buf);
+      get_car_number(root_value, &state_buf);
+      record_log(state_buf.car_number, 1);
+    }
+    else
+      state_buf.errno = REQ_FAIL;
     state_buf.msgtype = MSG_CAR_OUT_RES;
     
     if(msgsnd(msg_key, (void*)&state_buf, sizeof(MyState), IPC_NOWAIT) == -1){

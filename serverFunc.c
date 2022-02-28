@@ -71,7 +71,6 @@ int make_user_list(JSON_Value* root_value, char* response, int flag){
     strcpy(car_number, json_object_get_string(user_object, "carNumber"));
     strcpy(phone_number, json_object_get_string(user_object, "phoneNumber"));
 
-    
     is_resident = (int)json_object_get_number(user_object, "isResident");
     sprintf(line,"%s\t%s\t%s\t%s\n", name, car_number, phone_number, resident_state[is_resident]);
     // All
@@ -85,4 +84,79 @@ int make_user_list(JSON_Value* root_value, char* response, int flag){
   return 0;
 }
 
+//flag(0 = 입차, 1 = 출차)
+void record_log(char* car_number, int flag){
+  FILE* fp, *fp2;
+  time_t now;
+  struct tm *tmbuf;
+  char buf[BUFFER_SIZE];
+  
+  sprintf(buf, "%s.log", car_number);
+  
+  // 개인 로그파일 오픈
+  if((fp = fopen(buf, "a+")) == NULL){
+    fprintf(stderr, "fopen() error\n");
+    return;
+  }
 
+  // 통합 로그파일 오픈
+  if((fp2 = fopen("internal.log", "a+")) == NULL){
+    fprintf(stderr, "fopen() error\n");
+    return;
+  }
+   
+  now = time(NULL);
+  tmbuf = localtime(&now);
+  
+  if(flag == 0){
+    fprintf(fp, "[%d-%02d-%02d %02d:%02d:%02d] %s 입차\n", tmbuf->tm_year + 1900, tmbuf->tm_mon + 1, tmbuf->tm_mday, tmbuf->tm_hour, tmbuf->tm_min, tmbuf->tm_sec, car_number);
+    fprintf(fp2, "[%d-%02d-%02d %02d:%02d:%02d] %s 입차\n", tmbuf->tm_year + 1900, tmbuf->tm_mon + 1, tmbuf->tm_mday, tmbuf->tm_hour, tmbuf->tm_min, tmbuf->tm_sec, car_number);
+  }
+  else{
+    fprintf(fp, "[%d-%02d-%02d %02d:%02d:%02d] %s 출차\n", tmbuf->tm_year + 1900, tmbuf->tm_mon + 1, tmbuf->tm_mday, tmbuf->tm_hour, tmbuf->tm_min, tmbuf->tm_sec, car_number);
+    fprintf(fp2, "[%d-%02d-%02d %02d:%02d:%02d] %s 출차\n", tmbuf->tm_year + 1900, tmbuf->tm_mon + 1, tmbuf->tm_mday, tmbuf->tm_hour, tmbuf->tm_min, tmbuf->tm_sec, car_number);
+  }
+  fclose(fp);
+  fclose(fp2);
+}
+
+void calc_fee(JSON_Value* root_value, MyState* state_buf){
+  JSON_Object* root_object = json_value_get_object(root_value);
+  JSON_Array* user_array = json_object_get_array(root_object, "users");
+  time_t now;
+  int i, is_resident, user_key;
+
+  now = time(NULL);
+  for(i = 0; i < json_array_get_count(user_array); i++){
+    JSON_Value *user_value = json_array_get_value(user_array, i);
+    JSON_Object *user_object = json_value_get_object(user_value);
+    
+    is_resident = (int)json_object_get_number(user_object, "isResident");
+    user_key = (int)json_object_get_number(user_object, "userKey");
+
+    // 입주민인 경우
+    if(user_key == state_buf->user_key && is_resident == 2){
+      state_buf->cost = ((now - state_buf->unixtime) * 100) / 2;
+      return;
+    }
+  }
+  state_buf->cost = (now - state_buf->unixtime) * 100;
+}
+
+void get_car_number(JSON_Value* root_value, MyState* state_buf){
+  JSON_Object* root_object = json_value_get_object(root_value);
+  JSON_Array* user_array = json_object_get_array(root_object, "users");
+  int i, user_key;
+
+  for(i = 0; i < json_array_get_count(user_array); i++){
+    JSON_Value *user_value = json_array_get_value(user_array, i);
+    JSON_Object *user_object = json_value_get_object(user_value);
+
+    user_key = (int)json_object_get_number(user_object, "userKey");
+
+    if(user_key == state_buf->user_key){
+      strcpy(state_buf->car_number,json_object_get_string(user_object, "carNumber"));
+      return;
+    }
+  }
+}

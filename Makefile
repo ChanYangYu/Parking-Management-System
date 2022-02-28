@@ -2,7 +2,7 @@ all: server client manager
 GCC=gcc
 CFLAGS= -Wall -c -g
 
-server: server.o
+server: server.o serverFunc.o _parson.o
 	$(CC) -o $@ $^
 
 client: client.o

@@ -10,7 +10,13 @@ key_t key;
 
 void register_user(){
   
+  // 테스트 dummy 데이터
   register_buf.msgtype = MSG_REGISTER_REQ;
+  register_buf.is_resident = 1;
+  strcpy(register_buf.car_number, "경기가5288");
+  strcpy(register_buf.name, "유찬양");
+  strcpy(register_buf.phone_number, "01012345678");
+
   if(msgsnd(key, (void *)&register_buf, sizeof(Register), 0) == -1){
     fprintf(stderr,"Error: msgsnd() error\n");
     exit(1);
@@ -22,9 +28,9 @@ void register_user(){
   }
 
   if(state_buf.errno == REQ_SUCCESS)
-    printf("Register Success\n");
+    printf("Register Success!\nkey : %d\n", state_buf.user_key);
   else
-    printf("Register Fail\n");
+    printf("Register Fail!\n");
 }
 
 int main()

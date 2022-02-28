@@ -10,6 +10,8 @@ key_t key;
 
 void update_user(){
   register_buf.msgtype = MSG_UPDATE_REQ;
+  register_buf.is_resident = 2;
+  strcpy(register_buf.car_number, "경기가5288");
   if(msgsnd(key, (void *)&register_buf, sizeof(Register), 0) == -1){
     fprintf(stderr,"Error: msgsnd() error\n");
     exit(1);

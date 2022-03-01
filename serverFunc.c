@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include "_linkedList.h"
 #include "serverFunc.h"
 
 // 유저 등록 함수: key값 리턴
@@ -77,7 +78,7 @@ int make_user_list(JSON_Value* root_value, char* response, int flag){
     if(flag == 0)
       strcat(response, line);
     // Pending
-    else if(flag == 1 && is_resident == 2)
+    else if(flag == 1 && is_resident == 1)
       strcat(response, line);
   }
 
@@ -159,4 +160,61 @@ void get_car_number(JSON_Value* root_value, MyState* state_buf){
       return;
     }
   }
+}
+
+int is_parking(LinkedList *head, int user_key){
+  LinkedList *cur;
+
+  cur = head;
+  while(cur != NULL){
+    if(cur->key == user_key)
+      return 0;
+    cur = cur->next;
+  }
+
+  return -1;
+}
+
+int get_log(char* file_name, char* response)
+{
+  FILE *fp;
+  char buffer[BUFFER_SIZE];
+  int log_size, len;
+
+  if((fp = fopen(file_name, "r+")) == NULL)
+    return -1;
+
+  fseek(fp, 0, SEEK_END);
+  log_size = ftell(fp); 
+  fseek(fp, 0, SEEK_SET);
+
+  memset(response, 0, sizeof(RESPONSE_SIZE));
+  while(!feof(fp)){
+    fgets(buffer, sizeof(buffer), fp);
+
+    if(RESPONSE_SIZE - 100 > log_size)
+      strcat(response, buffer);
+    len = strlen(buffer);
+    log_size -= len;
+  }
+
+  return 0;
+}
+
+int get_user_info(JSON_Value *root_value, Register *register_buf){
+  JSON_Object* root_object = json_value_get_object(root_value);
+  JSON_Array* user_array = json_object_get_array(root_object, "users");
+  int i;
+
+  for(i = 0; i < json_array_get_count(user_array); i++){
+    JSON_Value *user_value = json_array_get_value(user_array, i);
+    JSON_Object *user_object = json_value_get_object(user_value);
+
+    if(!strcmp(json_object_get_string(user_object, "carNumber"), register_buf->car_number)){
+      strcpy(register_buf->name,json_object_get_string(user_object, "name"));
+      strcpy(register_buf->phone_number,json_object_get_string(user_object, "phoneNumber"));
+      return 0;
+    }
+  }
+  return -1;
 }

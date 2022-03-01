@@ -174,3 +174,29 @@ int is_parking(LinkedList *head, int user_key){
 
   return -1;
 }
+
+int get_log_string(char* file_name, char* response)
+{
+  FILE *fp;
+  char buffer[BUFFER_SIZE];
+  int log_size, len;
+
+  if((fp = fopen(file_name, "r+")) == NULL)
+    return -1;
+
+  fseek(fp, 0, SEEK_END);
+  log_size = ftell(fp); 
+  fseek(fp, 0, SEEK_SET);
+
+  memset(response, 0, sizeof(RESPONSE_SIZE));
+  while(!feof(fp)){
+    fgets(buffer, sizeof(buffer), fp);
+
+    if(RESPONSE_SIZE - 100 > log_size)
+      strcat(response, buffer);
+    len = strlen(buffer);
+    log_size -= len;
+  }
+
+  return 0;
+}

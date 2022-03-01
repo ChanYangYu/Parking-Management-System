@@ -12,5 +12,6 @@ void record_log(char *car_number, int flag);
 void calc_fee(JSON_Value* root_value, MyState* state_buf);
 void get_car_number(JSON_Value* root_value, MyState* state_buf);
 int is_parking(LinkedList *head, int user_key);
+int get_log_string(char* file_name, char* response);
 
 #endif

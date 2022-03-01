@@ -37,7 +37,7 @@
 #define MSG_FIND_CARS_REQ 15
 #define MSG_FIND_CARS_RES 16
 #define MSG_FIND_CARS_DETAIL_REQ 17
-#define MSG_FIND_CARS_DETAIL_REQ 18
+#define MSG_FIND_CARS_DETAIL_RES 18
 #define MSG_FIND_CAR_NUMBER_REQ 19
 #define MSG_FIND_CAR_NUMBER_RES 20
 #define MSG_FIND_ALL_HISTORY_REQ 21
@@ -73,6 +73,7 @@ typedef struct MyState {
 // manager 조회 전반
 typedef struct Manage {
     long msgtype;                 //메세지 타입
+    int pos;                      //주차장 위치번호
     char response[RESPONSE_SIZE]; //요청한 값을 저장할 문자열
     int errno;                    //에러코드
 } Manage;

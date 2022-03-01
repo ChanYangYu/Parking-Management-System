@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include "_linkedList.h"
 #include "serverFunc.h"
 
 // 유저 등록 함수: key값 리턴
@@ -159,4 +160,17 @@ void get_car_number(JSON_Value* root_value, MyState* state_buf){
       return;
     }
   }
+}
+
+int is_parking(LinkedList *head, int user_key){
+  LinkedList *cur;
+
+  cur = head;
+  while(cur != NULL){
+    if(cur->key == user_key)
+      return 0;
+    cur = cur->next;
+  }
+
+  return -1;
 }

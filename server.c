@@ -19,6 +19,7 @@ void process_listup_all(key_t msg_key);
 void process_listup_pending(key_t msg_key);
 void process_in(key_t msg_key);
 void process_out(key_t msg_key);
+void process_find_my_car(key_t msg_key);
 
 int main()
 { 
@@ -43,7 +44,7 @@ int main()
     process_listup_pending(msg_key);
     process_in(msg_key);
     process_out(msg_key);
-
+    process_find_my_car(msg_key);
     usleep(200000);
   }
 
@@ -157,11 +158,18 @@ void process_out(key_t msg_key){
 
 void process_find_my_car(key_t msg_key)
 {
-  if(msgrcv(msg_key, (void *)&state_buf, sizeof(MyState), MSG_CAR_OUT_REQ, IPC_NOWAIT) != -1){
+  if(msgrcv(msg_key, (void *)&state_buf, sizeof(MyState), MSG_CAR_STATE_REQ, IPC_NOWAIT) != -1){
     printf("[Find-My-Car]\n");
     
+    // 입차 = 0, 출차 = 1
+    if(is_parking(head, state_buf.user_key) == 0)
+      state_buf.state = 0;  
+    else
+      state_buf.state = 1;
+    
+   //todo: state_buf->map 업데이트
     state_buf.errno = REQ_SUCCESS;
-    state_buf.msgtype = MSG_CAR_OUT_RES;
+    state_buf.msgtype = MSG_CAR_STATE_RES;
     
     if(msgsnd(msg_key, (void*)&state_buf, sizeof(MyState), IPC_NOWAIT) == -1){
       fprintf(stderr,"Error: msgsnd() error\n");

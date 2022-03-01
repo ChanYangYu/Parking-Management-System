@@ -11,17 +11,13 @@ key_t key;
 
 void current_parking_state(){
   
-  ////////////////////////////////////////////////////////////////////
-  // 차량 현황을 조회하기 위한 리퀘스트가 MSG_FIND_CAR_REQ가 맞나요?//
-  ////////////////////////////////////////////////////////////////////
-  
   manage_buf.msgtype = MSG_FIND_CARS_REQ;
-  if(msgsnd(key, (void *)&manage_buf, sizeof(Manage), 0) == -1){
+  if(msgsnd(key, (void *)&manage_buf, sizeof(Manage) - sizeof(long), 0) == -1){
     fprintf(stderr,"Error: msgsnd() error\n");
     exit(1);
   }
 
-  if(msgrcv(key, (void *)&manage_buf, sizeof(Manage), MSG_FIND_CARS_RES, 0) == -1){
+  if(msgrcv(key, (void *)&manage_buf, sizeof(Manage) - sizeof(long), MSG_FIND_CARS_RES, 0) == -1){
     fprintf(stderr,"Error: msgrcv() error\n");
     exit(1);
   }
@@ -31,19 +27,16 @@ void current_parking_state(){
   else
     printf("Parking State Error!\n");
   
-  // 세부 정보 조회 코드 추가 2022-03-01 17:58
-  // 같은 함수 내에서 msgtype을 변경해도 되는건지 질문해야함
-  // 안 된다면 쪼개기
   printf("정보를 조회하고 싶은 차량의 주차장 번호를 입력하세요: ");
-  scanf("%d", &manage_buf.pos);      // scanf로 이렇게 받아도 되는건지 질문
+  scanf("%d", &manage_buf.pos);
 
   manage_buf.msgtype = MSG_FIND_CARS_DETAIL_REQ;
-  if(msgsnd(key, (void *)&manage_buf, sizeof(Manage), 0) == -1){
+  if(msgsnd(key, (void *)&manage_buf, sizeof(Manage) - sizeof(long), 0) == -1){
     fprintf(stderr,"Error: msgsnd() error\n");
     exit(1);
   }
 
-  if(msgrcv(key, (void *)&manage_buf, sizeof(Manage), MSG_FIND_CARS_DETAIL_RES, 0) == -1){
+  if(msgrcv(key, (void *)&manage_buf, sizeof(Manage) - sizeof(long), MSG_FIND_CARS_DETAIL_RES, 0) == -1){
     fprintf(stderr,"Error: msgrcv() error\n");
     exit(1);
   }
@@ -64,12 +57,12 @@ void parking_history(){
   if(history_select_number == 1){      // 통합 이력 조회
     
     state_buf.msgtype = MSG_FIND_ALL_HISTORY_REQ;      // 메시지 큐 변수 확인하고 변경해야함
-    if(msgsnd(key, (void *)&state_buf, sizeof(MyState), 0) == -1){
+    if(msgsnd(key, (void *)&state_buf, sizeof(MyState) - sizeof(long), 0) == -1){
       fprintf(stderr,"Error: msgsnd() error\n");
       exit(1);
     }
 
-    if(msgrcv(key, (void *)&manage_buf, sizeof(Manage), MSG_FIND_ALL_HISTORY_RES, 0) == -1){
+    if(msgrcv(key, (void *)&manage_buf, sizeof(Manage) - sizeof(long), MSG_FIND_ALL_HISTORY_RES, 0) == -1){
       fprintf(stderr,"Error: msgrcv() error\n");
       exit(1);
     }
@@ -84,12 +77,12 @@ void parking_history(){
   else if(history_select_number == 2){      // 개인 이력 조회
     
     state_buf.msgtype = MSG_FIND_USER_HISTORY_REQ;      // 메시지 큐 변수 확인하고 변경해야함
-    if(msgsnd(key, (void *)&state_buf, sizeof(MyState), 0) == -1){
+    if(msgsnd(key, (void *)&state_buf, sizeof(MyState) - sizeof(long), 0) == -1){
       fprintf(stderr,"Error: msgsnd() error\n");
       exit(1);
     }
 
-    if(msgrcv(key, (void *)&manage_buf, sizeof(Manage), MSG_FIND_USER_HISTORY_RES, 0) == -1){
+    if(msgrcv(key, (void *)&manage_buf, sizeof(Manage) - sizeof(long), MSG_FIND_USER_HISTORY_RES, 0) == -1){
       fprintf(stderr,"Error: msgrcv() error\n");
       exit(1);
     } 
@@ -110,12 +103,12 @@ void update_user(){
   register_buf.msgtype = MSG_UPDATE_REQ;
   register_buf.is_resident = 2;
   strcpy(register_buf.car_number, "경기가5288");
-  if(msgsnd(key, (void *)&register_buf, sizeof(Register), 0) == -1){
+  if(msgsnd(key, (void *)&register_buf, sizeof(Register) - sizeof(long), 0) == -1){
     fprintf(stderr,"Error: msgsnd() error\n");
     exit(1);
   }
 
-  if(msgrcv(key, (void *)&register_buf, sizeof(Register), MSG_UPDATE_RES, 0) == -1){
+  if(msgrcv(key, (void *)&register_buf, sizeof(Register) - sizeof(long), MSG_UPDATE_RES, 0) == -1){
     fprintf(stderr,"Error: msgrcv() error\n");
     exit(1);
   }
@@ -128,12 +121,12 @@ void update_user(){
 
 void user_list_all(){
   manage_buf.msgtype = MSG_LISTUP_ALL_REQ;
-  if(msgsnd(key, (void *)&manage_buf, sizeof(Manage), 0) == -1){
+  if(msgsnd(key, (void *)&manage_buf, sizeof(Manage) - sizeof(long), 0) == -1){
     fprintf(stderr,"Error: msgsnd() error\n");
     exit(1);
   }
 
-  if(msgrcv(key, (void *)&manage_buf, sizeof(Manage), MSG_LISTUP_ALL_RES, 0) == -1){
+  if(msgrcv(key, (void *)&manage_buf, sizeof(Manage) - sizeof(long), MSG_LISTUP_ALL_RES, 0) == -1){
     fprintf(stderr,"Error: msgrcv() error\n");
     exit(1);
   }
@@ -146,12 +139,12 @@ void user_list_all(){
 
 void user_list_pen(){
   manage_buf.msgtype = MSG_LISTUP_PEN_REQ;
-  if(msgsnd(key, (void *)&manage_buf, sizeof(Manage), 0) == -1){
+  if(msgsnd(key, (void *)&manage_buf, sizeof(Manage) - sizeof(long), 0) == -1){
     fprintf(stderr,"Error: msgsnd() error\n");
     exit(1);
   }
 
-  if(msgrcv(key, (void *)&manage_buf, sizeof(Manage), MSG_LISTUP_PEN_RES, 0) == -1){
+  if(msgrcv(key, (void *)&manage_buf, sizeof(Manage) - sizeof(long), MSG_LISTUP_PEN_RES, 0) == -1){
     fprintf(stderr,"Error: msgrcv() error\n");
     exit(1);
   }
@@ -165,12 +158,12 @@ void user_list_pen(){
 void find_name_number(){
   
   register_buf.msgtype = MSG_FIND_CAR_NUMBER_REQ;
-  if(msgsnd(key, (void *)&register_buf, sizeof(Register), 0) == -1){
+  if(msgsnd(key, (void *)&register_buf, sizeof(Register) - sizeof(long), 0) == -1){
     fprintf(stderr,"Error: msgsnd() error\n");
     exit(1);
   }
 
-  if(msgrcv(key, (void *)&register_buf, sizeof(Register), MSG_FIND_CAR_NUMBER_RES, 0) == -1){
+  if(msgrcv(key, (void *)&register_buf, sizeof(Register) - sizeof(long), MSG_FIND_CAR_NUMBER_RES, 0) == -1){
     fprintf(stderr,"Error: msgrcv() error\n");
     exit(1);
   }

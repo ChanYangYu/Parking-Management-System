@@ -21,12 +21,14 @@ private:
     int getkey(void);
     void new_user_init(void);
     void print_parking_map(void);
-    void set_cron_message(void);
-    void delete_cron_message(void);
-    
+    void save_time_file(void);
+
 public:
     bool mycarstate;
+    bool want_quit = false;
 
+    void set_cron_message(void);
+    void delete_cron_message(void);
     void client_process_setup(void);
     void parkingin(void);
     void parkingout(void);

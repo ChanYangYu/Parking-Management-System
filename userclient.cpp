@@ -103,20 +103,36 @@ SIGNUP:
 
 void UserClient::print_parking_map(void)
 {
+    printf("\n\n주차장 사진\n\n");
+}
 
+void UserClient::save_time_file(void)
+{
+    int new_time_file = open("key.txt", O_CREAT|O_WRONLY|O_TRUNC);
+
+    char timebuf[100];
+
+    sprintf(timebuf, "%d", my_info.unixtime);
+
+    if(write(new_time_file, timebuf, sizeof(timebuf)) == -1)
+    {
+        printf("프로그램 실행 에러 시스템을 종료합니다.\n");
+        fprintf(stderr,"Error write time file.\n");
+        exit(1);
+    }
 }
 
 void UserClient::set_cron_message(void)
 {
-    system(" { crontab -l & echo \'*/5 * * * * echo 분 지났습니다. > /dev/pts/0\'; } | crontab -");
-    system(" { crontab -l & echo \'*/5 * * * * ./calculatetime > /dev/pts/0\'; } | crontab -");
-    system(" { crontab -l & echo \'*/5 * * * * echo 님이 주차하신지 > /dev/pts/0\'; } | crontab -");
-    system(" { crontab -l & echo \'*/5 * * * * ./checkkey > /dev/pts/0\'; } | crontab -");
+    save_time_file();
+    system("gcc checkkey.c -o checkky");
+    system("gcc calculatetime.c -o calculatetime");
+    system(" { crontab -l & echo \'* * * * * ./checkkey > /dev/pts/0 && echo -n 님이 주차하신지 > /dev/pts/0 && ./calculatetime > /dev/pts/0 && echo 분 지났습니다. > /dev/pts/0\'; } | crontab -");
 }
 
 void UserClient::delete_cron_message(void)
 {
-    system(" crontab -l | grep -v '*/5 * * * *' | crontab -");
+    system(" crontab -l | grep -v '/dev/pts/0' | crontab -");
 }
 
 void UserClient::client_process_setup(void)
@@ -170,13 +186,21 @@ void UserClient::client_process_setup(void)
         exit(1);
     }
 
+    if(my_info.state == 1)
+        mycarstate = true;
+    else
+        mycarstate = false;
 }
 
 void UserClient::parkingin(void)
 {
     my_info.msgtype = MSG_CAR_IN_REQ;
-    printf("입차 화면입니다 입차를 원하시면 아무키나 눌러주세요...\n");
+    printf("입차 화면입니다 입차를 원하시면 아무키나 눌러주세요... (시스템 종료를 원하시면 q를 눌러주세요)\n");
+    
     char keyboardbuf = getkey();
+
+    if(keyboardbuf == 'q' || keyboardbuf == 'Q')
+        return 0;
 
     printf("자동으로 최적의 위치로 입차를 진행합니다.\n")
 
@@ -205,6 +229,8 @@ void UserClient::parkingin(void)
         fprintf(stderr,"Error abnormal parkingin.\n");
         exit(1);
     }
+
+    mycarstate = false;
 }
 
 void parkingout(void)
@@ -213,8 +239,11 @@ void parkingout(void)
 
     print_parking_map();
 
-    printf("출차 화면입니다 출차를 원하시면 아무키나 눌러주세요...\n");
+    printf("출차 화면입니다 출차를 원하시면 아무키나 눌러주세요... (시스템 종료를 원하시면 q를 눌러주세요)\n");
     char keyboardbuf = getkey();
+
+    if(keyboardbuf == 'q' || keyboardbuf == 'Q')
+        return 0;
 
     printf("자동으로 최적의 위치로 입차를 진행합니다.\n")
 
@@ -234,8 +263,7 @@ void parkingout(void)
     
     if(state_buf.errno == REQ_SUCCESS)
     {
-        printf("%s 자동차가 %ld에 입차가 완료되었습니다.\n", my_info.car_number, my_info.unixtime);
-        delete_cron_message();
+        printf("%s 자동차가 %ld에 출차가 완료되었습니다.\n", my_info.car_number, my_info.unixtime);
     } 
     else
     {
@@ -243,4 +271,6 @@ void parkingout(void)
         fprintf(stderr,"Error abnormal parkingout.\n");
         exit(1);
     }
+
+    mycarstate = true;
 }

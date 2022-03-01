@@ -17,6 +17,6 @@ int main()
     int user_key = atoi(keybuf);
 
     printf("%d ", user_key);
-
+    close(user_key_file);
     return 0;
 }

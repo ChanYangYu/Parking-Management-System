@@ -22,5 +22,6 @@ int main()
 
     printf("%d ", user_time);
 
+    close(user_time_file);
     return 0;
 }

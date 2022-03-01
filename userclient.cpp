@@ -3,6 +3,7 @@
 //global varriable
 key_t msg_key;
 MyState my_info;
+Register basic_info;
 
 UserClient::UserClient()
 {
@@ -66,14 +67,14 @@ SIGNUP:
 
     basic_info.msgtype = MSG_REGISTER_REQ;
 
-    if(msgsnd(msg_key, (void *)&basic_info, sizeof(Register), 0) == -1)
+    if(msgsnd(msg_key, (void *)&basic_info, sizeof(Register) - sizeof(long), 0) == -1)
     {
         printf("프로그램 실행 에러 시스템을 종료합니다.\n");
         fprintf(stderr,"Error send message to server.\n");
         exit(1);
     }
     
-    if(msgrcv(msg_key, (void *)&my_info, sizeof(MyState), MSG_REGISTER_RES, 0) == -1)
+    if(msgrcv(msg_key, (void *)&my_info, sizeof(MyState) - sizeof(long), MSG_REGISTER_RES, 0) == -1)
     {
         printf("프로그램 실행 에러 시스템을 종료합니다.\n");
         fprintf(stderr,"Error get message to server.\n");
@@ -107,6 +108,7 @@ SIGNUP:
         exit(1);
     }
     close(new_user_file);
+    getchar();
 }
 
 void UserClient::print_parking_map(void)
@@ -154,32 +156,12 @@ void UserClient::get_tty(void)
 
 void UserClient::set_cron_message(void)
 {
-    save_time_file();
-    system("g++ checkkey.cpp userclient.o -o checkky");
-    system("g++ calculatetime.cpp userclient.o -o calculatetime");
-
-    char sysmessage[1000];
-
-    strcat(sysmessage, " { crontab -l & echo \'* * * * * ./checkkey > ");
-    strcat(sysmessage, ttybuf);
-    strcat(sysmessage, " && echo -n 님이 주차하신지 > ");
-    strcat(sysmessage, ttybuf);
-    strcat(sysmessage, " && ./calculatetime > ");
-    strcat(sysmessage, ttybuf);
-    strcat(sysmessage, " && echo 분 지났습니다. > ");
-    strcat(sysmessage, ttybuf);
-    strcat(sysmessage, "\'; } | crontab -");
-    //system(" { crontab -l & echo \'* * * * * ./checkkey > /dev/pts/0 && echo -n 님이 주차하신지 > /dev/pts/0 && ./calculatetime > /dev/pts/0 && echo 분 지났습니다. > /dev/pts/0\'; } | crontab -");
+    system(" { crontab -l & echo \'* * * * * ./checkkey > /dev/pts/0 && echo -n 님이 주차하신지 > /dev/pts/0 && ./calculatetime > /dev/pts/0 && echo 분 지났습니다. > /dev/pts/0\'; } | crontab -");
 }
 
 void UserClient::delete_cron_message(void)
 {
-    char sysmessage[1000];
-
-    strcat(sysmessage, " crontab -l | grep -v ");
-    strcat(sysmessage, ttybuf);
-    strcat(sysmessage, " | crontab -");
-    //system(" crontab -l | grep -v '/dev/pts/0' | crontab -");
+    system(" crontab -l | grep -v '/dev/pts/0' | crontab -");
 }
 
 void UserClient::client_process_setup(void)
@@ -221,14 +203,14 @@ void UserClient::client_process_setup(void)
 
     my_info.msgtype = MSG_CAR_STATE_REQ;
 
-    if(msgsnd(msg_key, (void *)&my_info, sizeof(MyState), 0) == -1)
+    if(msgsnd(msg_key, (void *)&my_info, sizeof(MyState) - sizeof(long), 0) == -1)
     {
         printf("프로그램 실행 에러 시스템을 종료합니다.\n");
         fprintf(stderr,"Error send message to server.\n");
         exit(1);
     }
 
-    if(msgrcv(msg_key, (void *)&my_info, sizeof(MyState), MSG_CAR_STATE_RES, 0) == -1)
+    if(msgrcv(msg_key, (void *)&my_info, sizeof(MyState) - sizeof(long), MSG_CAR_STATE_RES, 0) == -1)
     {
         printf("프로그램 실행 에러 시스템을 종료합니다.\n");
         fprintf(stderr,"Error get message to server.\n");
@@ -246,22 +228,24 @@ void UserClient::parkingin(void)
     my_info.msgtype = MSG_CAR_IN_REQ;
 
     printf("입차 화면입니다 입차를 원하시면 아무키나 눌러주세요... (시스템 종료를 원하시면 q를 눌러주세요)\n");
-    while(getchar() != '\n');
     char keyboardbuf = getkey();
 
-    if(keyboardbuf == 'q' || keyboardbuf == 'Q')
-        return;
+    if(keyboardbuf == 'q')
+    {
+        want_quit = true;
+        goto ENDIN;
+    }
 
     printf("자동으로 최적의 위치로 입차를 진행합니다.\n");
 
-    if(msgsnd(msg_key, (void *)&my_info, sizeof(MyState), 0) == -1)
+    if(msgsnd(msg_key, (void *)&my_info, sizeof(MyState) - sizeof(long), 0) == -1)
     {
         printf("프로그램 실행 에러 시스템을 종료합니다.\n");
         fprintf(stderr,"Error send message to server.\n");
         exit(1);
     }
 
-    if(msgrcv(msg_key, (void *)&my_info, sizeof(MyState), MSG_CAR_IN_RES, 0) == -1)
+    if(msgrcv(msg_key, (void *)&my_info, sizeof(MyState) - sizeof(long), MSG_CAR_IN_RES, 0) == -1)
     {
         printf("프로그램 실행 에러 시스템을 종료합니다.\n");
         fprintf(stderr,"Error get message to server.\n");
@@ -281,6 +265,8 @@ void UserClient::parkingin(void)
     }
 
     mycarstate = false;
+    save_time_file();
+ENDIN:
 }
 
 void UserClient::parkingout(void)
@@ -290,22 +276,26 @@ void UserClient::parkingout(void)
     print_parking_map();
 
     printf("출차 화면입니다 출차를 원하시면 아무키나 눌러주세요... (시스템 종료를 원하시면 q를 눌러주세요)\n");
-    while(getchar() != '\n');
+    
     char keyboardbuf = getkey();
 
-    if(keyboardbuf == 'q' || keyboardbuf == 'Q')
-        return;
+    if(keyboardbuf == 'q')
+    {
+        want_quit = true;
+        goto ENDOUT;
+    }
+        
 
     printf("출차를 진행합니다.\n");
 
-    if(msgsnd(msg_key, (void *)&my_info, sizeof(MyState), 0) == -1)
+    if(msgsnd(msg_key, (void *)&my_info, sizeof(MyState) - sizeof(long), 0) == -1)
     {
         printf("프로그램 실행 에러 시스템을 종료합니다.\n");
         fprintf(stderr,"Error send message to server.\n");
         exit(1);
     }
 
-    if(msgrcv(msg_key, (void *)&my_info, sizeof(MyState), MSG_CAR_OUT_RES, 0) == -1)
+    if(msgrcv(msg_key, (void *)&my_info, sizeof(MyState) - sizeof(long), MSG_CAR_OUT_RES, 0) == -1)
     {
         printf("프로그램 실행 에러 시스템을 종료합니다.\n");
         fprintf(stderr,"Error get message to server.\n");
@@ -324,4 +314,5 @@ void UserClient::parkingout(void)
     }
 
     mycarstate = true;
+ENDOUT;
 }

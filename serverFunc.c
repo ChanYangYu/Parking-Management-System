@@ -78,7 +78,7 @@ int make_user_list(JSON_Value* root_value, char* response, int flag){
     if(flag == 0)
       strcat(response, line);
     // Pending
-    else if(flag == 1 && is_resident == 2)
+    else if(flag == 1 && is_resident == 1)
       strcat(response, line);
   }
 

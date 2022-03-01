@@ -21,6 +21,7 @@ void process_in(key_t msg_key);
 void process_out(key_t msg_key);
 void process_find_my_car(key_t msg_key);
 void process_find_user_all_history(key_t msg_key);
+void process_find_user_history(key_t msg_key);
 
 int main()
 { 
@@ -47,6 +48,8 @@ int main()
     process_out(msg_key);
     process_find_my_car(msg_key);
     process_find_user_all_history(msg_key);
+    process_find_user_history(msg_key);
+
     usleep(200000);
   }
 
@@ -181,14 +184,36 @@ void process_find_my_car(key_t msg_key)
 }
 
 void process_find_user_all_history(key_t msg_key){
-  if(msgrcv(msg_key, (void *)&manage_buf, sizeof(Manage), MSG_FIND_ALL_HISTORY_REQ, IPC_NOWAIT) != -1){
+  char *file_name = "internal.log";
+
+  if(msgrcv(msg_key, (void *)&state_buf, sizeof(MyState), MSG_FIND_ALL_HISTORY_REQ, IPC_NOWAIT) != -1){
     printf("[User-All-History]\n");
     
-    if(get_log_string("internal.log", manage_buf.response) == -1)
+    if(get_log_string(file_name, manage_buf.response) == -1)
       manage_buf.errno = REQ_FAIL;
     else
       manage_buf.errno = REQ_SUCCESS;
     manage_buf.msgtype = MSG_FIND_ALL_HISTORY_RES;
+    
+    if(msgsnd(msg_key, (void*)&manage_buf, sizeof(Manage), IPC_NOWAIT) == -1){
+      fprintf(stderr,"Error: msgsnd() error\n");
+      exit(1);
+    }
+  }
+}
+
+void process_find_user_history(key_t msg_key){
+  char file_name[BUFFER_SIZE];
+
+  if(msgrcv(msg_key, (void *)&state_buf, sizeof(MyState), MSG_FIND_USER_HISTORY_REQ, IPC_NOWAIT) != -1){
+    printf("[User-Personal-History]\n");
+    
+    sprintf(file_name, "%s.log", state_buf.car_number);
+    if(get_log_string(file_name, manage_buf.response) == -1)
+      manage_buf.errno = REQ_FAIL;
+    else
+      manage_buf.errno = REQ_SUCCESS;
+    manage_buf.msgtype = MSG_FIND_USER_HISTORY_RES;
     
     if(msgsnd(msg_key, (void*)&manage_buf, sizeof(Manage), IPC_NOWAIT) == -1){
       fprintf(stderr,"Error: msgsnd() error\n");

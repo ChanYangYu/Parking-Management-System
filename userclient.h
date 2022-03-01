@@ -15,7 +15,6 @@ class UserClient
 {
 private:
     Register basic_info;
-    MyState my_info;
     char ttybuf[100];
 
     int getkey(void);

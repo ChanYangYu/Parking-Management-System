@@ -2,6 +2,7 @@
 
 //global varriable
 key_t msg_key;
+MyState my_info;
 
 UserClient::UserClient()
 {
@@ -243,7 +244,7 @@ void UserClient::client_process_setup(void)
 void UserClient::parkingin(void)
 {
     my_info.msgtype = MSG_CAR_IN_REQ;
-    
+
     printf("입차 화면입니다 입차를 원하시면 아무키나 눌러주세요... (시스템 종료를 원하시면 q를 눌러주세요)\n");
     while(getchar() != '\n');
     char keyboardbuf = getkey();

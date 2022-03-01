@@ -29,11 +29,11 @@ void UserClient::new_user_init(void)
 USERINIT:
     printf("처음 오신것을 환영합니다. 신규 주차관리 유저 등록화면입니다\n");
     printf("이름을 입력해 주세요 : ");
-    scanf("%s", &basic_info.name);
+    scanf("%s", basic_info.name);
     printf("자동차 번호를 입력해 주세요 : ");
-    scanf("%s", &basic_info.car_number);
+    scanf("%s", basic_info.car_number);
     printf("전화 번호를 주세요 : ");
-    scanf("%s", &basic_info.phone_number);
+    scanf("%s", basic_info.phone_number);
  
     int numberbuf;
     printf("입주민 여부를 입력해주세요(맞으시면 1, 틀리시면 0) : ");
@@ -90,9 +90,11 @@ SIGNUP:
         printf("%s[%d]님 가입을 환영합니다.\n", basic_info.name, my_info.user_key);
     }
 
-    int new_user_file = open("key.txt", O_CREAT|O_WRONLY);
+    int new_user_file = open("key.txt", O_CREAT|O_WRONLY, 0755);
 
     char keybuf[100];
+
+    memset(keybuf, 0, sizeof(keybuf));
 
     sprintf(keybuf, "%d", my_info.user_key);
 
@@ -113,11 +115,13 @@ void UserClient::print_parking_map(void)
 
 void UserClient::save_time_file(void)
 {
-    int new_time_file = open("key.txt", O_CREAT|O_WRONLY|O_TRUNC);
+    int new_time_file = open("utime.txt", O_CREAT|O_WRONLY|O_TRUNC, 0755);
 
     char timebuf[100];
 
-    sprintf(timebuf, "%d", my_info.unixtime);
+    memset(timebuf, 0, sizeof(timebuf));
+
+    sprintf(timebuf, "%ld", my_info.unixtime);
 
     if(write(new_time_file, timebuf, sizeof(timebuf)) == -1)
     {

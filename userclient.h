@@ -14,9 +14,9 @@
 class UserClient
 {
 private:
-    key_t msg_key;
     Register basic_info;
     MyState my_info;
+    char ttybuf[100];
 
     int getkey(void);
     void new_user_init(void);
@@ -24,9 +24,12 @@ private:
     void save_time_file(void);
 
 public:
-    bool mycarstate;
+    UserClient();
+
+    bool mycarstate = false;
     bool want_quit = false;
 
+    void get_tty(void);
     void set_cron_message(void);
     void delete_cron_message(void);
     void client_process_setup(void);

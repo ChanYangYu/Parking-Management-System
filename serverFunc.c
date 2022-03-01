@@ -175,7 +175,7 @@ int is_parking(LinkedList *head, int user_key){
   return -1;
 }
 
-int get_log_string(char* file_name, char* response)
+int get_log(char* file_name, char* response)
 {
   FILE *fp;
   char buffer[BUFFER_SIZE];
@@ -199,4 +199,22 @@ int get_log_string(char* file_name, char* response)
   }
 
   return 0;
+}
+
+int get_user_info(JSON_Value *root_value, Register *register_buf){
+  JSON_Object* root_object = json_value_get_object(root_value);
+  JSON_Array* user_array = json_object_get_array(root_object, "users");
+  int i;
+
+  for(i = 0; i < json_array_get_count(user_array); i++){
+    JSON_Value *user_value = json_array_get_value(user_array, i);
+    JSON_Object *user_object = json_value_get_object(user_value);
+
+    if(!strcmp(json_object_get_string(user_object, "carNumber"), register_buf->car_number)){
+      strcpy(register_buf->name,json_object_get_string(user_object, "name"));
+      strcpy(register_buf->phone_number,json_object_get_string(user_object, "phoneNumber"));
+      return 0;
+    }
+  }
+  return -1;
 }

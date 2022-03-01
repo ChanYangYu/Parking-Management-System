@@ -15,7 +15,7 @@ int main()
         exit(1);
     }
 
-    int user_time = atoi(timebuf)
+    int user_time = atoi(timebuf);
 
     user_time = time(NULL) - user_time;
     user_time = user_time / 60; 

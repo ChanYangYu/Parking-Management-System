@@ -9,7 +9,7 @@
 #define CAR_NUMBER_SIZE 16
 #define PHONE_NUMBER_SIZE 16
 #define MAP_SIZE 1024
-#define RESPONSE_SIZE 2048
+#define RESPONSE_SIZE 4096
 #define BUFFER_SIZE 256
 
 // MessageQueue Constants

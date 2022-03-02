@@ -24,6 +24,7 @@ void process_find_user_all_history(key_t msg_key);
 void process_find_user_history(key_t msg_key);
 void process_find_by_car_number(key_t msg_key);
 void process_find_state(key_t msg_key);
+void process_find_detail_info(key_t msg_key);
 
 int main()
 { 
@@ -53,6 +54,7 @@ int main()
     process_find_user_history(msg_key);
     process_find_by_car_number(msg_key);
     process_find_state(msg_key);
+    process_find_detail_info(msg_key);
 
     usleep(200000);
   }
@@ -230,7 +232,7 @@ void process_find_by_car_number(key_t msg_key){
   if(msgrcv(msg_key, (void *)&register_buf, sizeof(Register) - sizeof(long), MSG_FIND_CAR_NUMBER_REQ, IPC_NOWAIT) != -1){
     printf("[Find-by-CarNumber]\n");
   
-    if(get_user_info(root_value, &register_buf) == -1)
+    if(get_user_info(root_value, &register_buf, -1) == -1)
       register_buf.errno = REQ_FAIL;
     else
       register_buf.errno = REQ_SUCCESS;
@@ -244,7 +246,7 @@ void process_find_by_car_number(key_t msg_key){
 }
 void process_find_state(key_t msg_key){
   if(msgrcv(msg_key, (void *)&manage_buf, sizeof(Manage) - sizeof(long), MSG_FIND_CARS_REQ, IPC_NOWAIT) != -1){
-    printf("[Find-Detail-Info]\n");
+    printf("[Find-State]\n");
   
     get_map(head, manage_buf.response);
     manage_buf.errno = REQ_SUCCESS;
@@ -259,16 +261,21 @@ void process_find_state(key_t msg_key){
 
 
 void process_find_detail_info(key_t msg_key){
+  int user_key;
   if(msgrcv(msg_key, (void *)&manage_buf, sizeof(Manage) - sizeof(long), MSG_FIND_CARS_DETAIL_REQ, IPC_NOWAIT) != -1){
     printf("[Find-Detail-Info]\n");
-  
-    // if(get_user_info(root_value, &register_buf) == -1)
-    //   register_buf.errno = REQ_FAIL;
-    // else
-    //   register_buf.errno = REQ_SUCCESS;
+
+    if((user_key = get_user_key(head, manage_buf.pos)) != -1){
+      if(get_user_info(root_value, &register_buf, user_key) == -1)
+        register_buf.errno = REQ_FAIL;
+      else
+        register_buf.errno = REQ_SUCCESS;
+    }
+    else
+       register_buf.errno = REQ_FAIL;
     register_buf.msgtype = MSG_FIND_CARS_DETAIL_RES;
     
-    if(msgsnd(msg_key, (void*)&manage_buf, sizeof(Manage) - sizeof(long), IPC_NOWAIT) == -1){
+    if(msgsnd(msg_key, (void*)&register_buf, sizeof(Register) - sizeof(long), IPC_NOWAIT) == -1){
       fprintf(stderr,"Error: msgsnd() error\n");
       exit(1);
     }

@@ -201,7 +201,7 @@ int get_log(char* file_name, char* response)
   return 0;
 }
 
-int get_user_info(JSON_Value *root_value, Register *register_buf){
+int get_user_info(JSON_Value *root_value, Register *register_buf, int user_key){
   JSON_Object* root_object = json_value_get_object(root_value);
   JSON_Array* user_array = json_object_get_array(root_object, "users");
   int i;
@@ -211,6 +211,12 @@ int get_user_info(JSON_Value *root_value, Register *register_buf){
     JSON_Object *user_object = json_value_get_object(user_value);
 
     if(!strcmp(json_object_get_string(user_object, "carNumber"), register_buf->car_number)){
+      strcpy(register_buf->name,json_object_get_string(user_object, "name"));
+      strcpy(register_buf->phone_number,json_object_get_string(user_object, "phoneNumber"));
+      return 0;
+    }
+
+    if((int)json_object_get_number(user_object, "userKey") == user_key){
       strcpy(register_buf->name,json_object_get_string(user_object, "name"));
       strcpy(register_buf->phone_number,json_object_get_string(user_object, "phoneNumber"));
       return 0;
@@ -271,4 +277,18 @@ void get_map(LinkedList *head, char *response){
     sprintf(buf, "%s\n", map[i]);
     strcat(response, buf);
   }
+}
+
+int get_user_key(LinkedList *head, int pos){
+  LinkedList *cur;
+
+  cur = head;
+  while(cur != NULL){
+    if(cur->idx == pos){
+      return cur->key;
+    }
+    cur = cur->next;
+  }
+
+  return -1;
 }

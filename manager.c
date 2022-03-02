@@ -11,42 +11,39 @@ key_t key;
 
 void current_parking_state(){
   
-  // 03-02 08:33 코드 추가 필요
-  //
-  //
-  state_buf.msgtype = MSG_FIND_CARS_REQ;
-  if(msgsnd(key, (void *)&state_buf, sizeof(MyState) - sizeof(long), 0) == -1){
+  manage_buf.msgtype = MSG_FIND_CARS_REQ;
+  if(msgsnd(key, (void *)&manage_buf, sizeof(Manage) - sizeof(long), 0) == -1){
     fprintf(stderr,"Error: msgsnd() error\n");
     exit(1);
   }
 
-  if(msgrcv(key, (void *)&state_buf, sizeof(MyState) - sizeof(long), MSG_FIND_CARS_RES, 0) == -1){
+  if(msgrcv(key, (void *)&manage_buf, sizeof(Manage) - sizeof(long), MSG_FIND_CARS_RES, 0) == -1){
     fprintf(stderr,"Error: msgrcv() error\n");
     exit(1);
   }
 
-  if(state_buf.errno == REQ_SUCCESS)
+  if(manage_buf.errno == REQ_SUCCESS)
     printf("%s\n",manage_buf.response);
   else
     printf("Parking State Error!\n");
   
   printf("정보를 조회하고 싶은 차량의 주차장 번호를 입력하세요: ");
-  scanf("%d", &manage_buf.pos);
+  scanf("%d", &manage_buf.pos);      // scanf로 이렇게 받아도 되는건지 질문
 
-  state_buf.msgtype = MSG_FIND_CARS_DETAIL_REQ;
-  if(msgsnd(key, (void *)&state_buf, sizeof(MyState) - sizeof(long), 0) == -1){
+  manage_buf.msgtype = MSG_FIND_CARS_DETAIL_REQ;
+  if(msgsnd(key, (void *)&manage_buf, sizeof(Manage) - sizeof(long), 0) == -1){
     fprintf(stderr,"Error: msgsnd() error\n");
     exit(1);
   }
 
-  if(msgrcv(key, (void *)&state_buf, sizeof(MyState) - sizeof(long), MSG_FIND_CARS_DETAIL_RES, 0) == -1){
+  if(msgrcv(key, (void *)&register_buf, sizeof(Register) - sizeof(long), MSG_FIND_CARS_DETAIL_RES, 0) == -1){
     fprintf(stderr,"Error: msgrcv() error\n");
     exit(1);
   }
   
-  if(state_buf.errno == REQ_SUCCESS)
-    printf("%s\n",manage_buf.response);
-  else
+  if(register_buf.errno == REQ_SUCCESS)      // 정보 조회 성공
+    printf("%s\n",register_buf.name);      // %s %s 로 쪼개서 표현 가능한지 질문
+  else                  // 정보 조회 실패
     printf("Detail Info Error!\n");
 }
 
@@ -56,8 +53,8 @@ void parking_history(){
   printf("통합 이력 조회를 하려면 1번, 개인 이력 조회를 하려면 2번을 눌러주세요 : ");
   scanf("%d", &history_select_number);
 
-  if(history_select_number == 1){
-    state_buf.msgtype = MSG_FIND_ALL_HISTORY_REQ;
+  if(history_select_number == 1){      // 통합 이력 조회
+    state_buf.msgtype = MSG_FIND_ALL_HISTORY_REQ;      // 메시지 큐 변수 확인하고 변경해야함
     if(msgsnd(key, (void *)&state_buf, sizeof(MyState) - sizeof(long), 0) == -1){
       fprintf(stderr,"Error: msgsnd() error\n");
       exit(1);
@@ -77,7 +74,7 @@ void parking_history(){
   
   else if(history_select_number == 2){
     
-    state_buf.msgtype = MSG_FIND_USER_HISTORY_REQ;
+    state_buf.msgtype = MSG_FIND_USER_HISTORY_REQ;      // 메시지 큐 변수 확인하고 변경해야함
     if(msgsnd(key, (void *)&state_buf, sizeof(MyState) - sizeof(long), 0) == -1){
       fprintf(stderr,"Error: msgsnd() error\n");
       exit(1);

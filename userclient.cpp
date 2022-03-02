@@ -110,9 +110,51 @@ SIGNUP:
     getchar();
 }
 
+void drawPoints()
+{
+	glClear(GL_COLOR_BUFFER_BIT);
+	glColor3f(1.0, 1.0, 1.0);
+	glBegin(GL_POLYGON);
+	glVertex2f(-0.5, 0.0);
+	glVertex2f(0.5, 0.0);
+	glVertex2f(0.0, 1.0);
+	glEnd();
+	glFlush();
+}
+
+pid_t pid;
+
+void keyboard(unsigned char key, int x, int y)
+{
+	switch(key){
+		case 'q':
+			exit(pid);
+			break;
+	}
+	glutPostRedisplay();
+}
+
 void UserClient::print_parking_map(void)
 {
     printf("\n\n%s\n\n", my_info.map);
+    
+    pid = fork();
+    if(pid == 0)
+    {
+    	int mode = GLUT_RGB | GLUT_SINGLE;
+    	int argc = 1;
+    	char **argv;
+    	glutInit(&argc, argv);
+    	glutInitDisplayMode(mode);
+    	glutInitWindowPosition(100,100);
+    	glutInitWindowSize(400,400);
+    	glutCreateWindow("OpenGL");
+    	glutSetWindowTitle("exam");
+
+    	glutDisplayFunc(drawPoints);
+    	glutKeyboardFunc(keyboard);
+    	glutMainLoop();
+    }
 }
 
 void UserClient::save_time_file(void)
@@ -166,12 +208,12 @@ void UserClient::get_tty(void)
 
 void UserClient::set_cron_message(void)
 {
-    system("g++ checkkey.cpp userclient.o -o checkkey");
-    system("g++ calculatetime.cpp userclient.o -o calculatetime");
+    system("g++ checkkey.cpp userclient.o -o checkkey -lglut -lGL -lGLU");
+    system("g++ calculatetime.cpp userclient.o -o calculatetime -lglut -lGL -lGLU");
 
     char sysmessage[1000];
 
-    strcat(sysmessage, " { crontab -l & echo \'* * * * * ");
+    strcpy(sysmessage, " { crontab -l & echo \'* * * * * ");
     strcat(sysmessage, userdir);
     strcat(sysmessage, "/checkkey ");
     strcat(sysmessage, userdir);
@@ -194,12 +236,12 @@ void UserClient::set_cron_message(void)
 
 void UserClient::delete_cron_message(void)
 {
-    char sysmessage[1000];
+    char sysmessage2[1000];
 
-    strcat(sysmessage, " crontab -l | grep -v ");
-    strcat(sysmessage, ttybuf);
-    strcat(sysmessage, " | crontab -");
-    //system(sysmessage);
+    strcpy(sysmessage2, " crontab -l | grep -v ");
+    strcat(sysmessage2, ttybuf);
+    strcat(sysmessage2, " | crontab -");
+    system(sysmessage2);
     //system(" crontab -l | grep -v '/dev/pts/0' | crontab -");
 }
 
@@ -269,6 +311,17 @@ void UserClient::parkingin(void)
 {
     my_info.msgtype = MSG_CAR_IN_REQ;
 
+    irrklang::ISoundEngine* engine = irrklang::createIrrKlangDevice();
+    if(!engine)
+    {
+	    printf("error\n");
+    }
+    irrklang::ISoundSource* mp3_src = nullptr;
+    mp3_src = engine->addSoundSourceFromFile("bell.wav");
+    mp3_src->setDefaultVolume(3.0f);
+    engine->play2D(mp3_src,true);
+
+
     printf("입차 화면입니다 입차를 원하시면 아무키나 눌러주세요... (시스템 종료를 원하시면 q를 눌러주세요)\n");
     char keyboardbuf = getkey();
 
@@ -305,6 +358,7 @@ void UserClient::parkingin(void)
         exit(1);
     }
 
+    engine->drop();
     mycarstate = false;
     save_time_file();
 ENDIN:

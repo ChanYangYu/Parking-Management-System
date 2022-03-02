@@ -1,4 +1,13 @@
 {
-  "totalUserNumber": 0,
-  "users": []
+    "totalUserNumber": 1,
+    "users": [
+        {
+            "userKey": 1,
+            "isParking": false,
+            "name": "myn",
+            "carNumber": "10가5493",
+            "phoneNumber": "01012345678",
+            "isResident": 1
+        }
+    ]
 }

@@ -10,6 +10,9 @@
 #include <fcntl.h>
 #include "_ipc.h"
 #include <termio.h>
+#include "GL/freeglut.h"
+#include <irrKlang.h>
+#include "include/conio.h"
 
 class UserClient
 {

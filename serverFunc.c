@@ -201,7 +201,7 @@ int get_log(char* file_name, char* response)
   return 0;
 }
 
-int get_user_info(JSON_Value *root_value, Register *register_buf){
+int get_user_info(JSON_Value *root_value, Register *register_buf, int user_key){
   JSON_Object* root_object = json_value_get_object(root_value);
   JSON_Array* user_array = json_object_get_array(root_object, "users");
   int i;
@@ -215,6 +215,82 @@ int get_user_info(JSON_Value *root_value, Register *register_buf){
       strcpy(register_buf->phone_number,json_object_get_string(user_object, "phoneNumber"));
       return 0;
     }
+
+    if((int)json_object_get_number(user_object, "userKey") == user_key){
+      strcpy(register_buf->name,json_object_get_string(user_object, "name"));
+      strcpy(register_buf->phone_number,json_object_get_string(user_object, "phoneNumber"));
+      return 0;
+    }
   }
+  return -1;
+}
+
+void get_map(LinkedList *head, char *response, int pos){
+  int i, j;
+  int number = 15;
+  LinkedList *cur;
+  char buf[BUFFER_SIZE];
+  char map[20][BUFFER_SIZE-1] = {
+                    "┌─────┬─────┬─────┬─────┬─────┬─────┬─────┬─────┬─────┬─────┐",
+                    "│     │     │     │     │     │     │     │     │     │     │",
+                    "│     │     │     │     │     │     │     │     │     │     │",
+                    "│     │     │     │     │     │     │     │     │     │     │",
+                    "│     │     │     │     │     │     │     │     │     │     │",
+                    "└─────┴─────┴─────┴─────┴─────┴─────┴─────┴─────┴─────┴─────┘",
+                    "   1     2     3     4     5     6     7     8     9     10",
+                    "┌───────────────────────────────────────────────────────────┐",
+                    "│                                                           │",
+                    "│                                                           │",
+                    "│                                                           │",
+                    "│                                                           │",
+                    "└───────────────────────────────────────────────────────────┘",
+                    "┌─────┬─────┬─────┬─────┬─────┬─────┬─────┬─────┬─────┬─────┐",
+                    "│     │     │     │     │     │     │     │     │     │     │",
+                    "│     │     │     │     │     │     │     │     │     │     │",
+                    "│     │     │     │     │     │     │     │     │     │     │",
+                    "│     │     │     │     │     │     │     │     │     │     │",
+                    "└─────┴─────┴─────┴─────┴─────┴─────┴─────┴─────┴─────┴─────┘",
+                    "  11    12    13    14     15    16    17    18    19    20",};
+  
+  memset(response, 0, sizeof(RESPONSE_SIZE));
+
+  cur = head;
+  while(cur != NULL){
+    number = cur->idx;
+
+    if(pos != -1 && cur->idx != pos)
+      continue;
+    if(number < 11){
+      number -= 1;
+      for(i = 1; i <= 4; i++)
+        for(j = 4; j <= 6; j++)
+          map[i][(8 * number) + j] = 'X';
+    }
+    else{
+      number -= 11;
+      for(i = 14; i <= 17; i++)
+          for(j = 4; j <= 6; j++)
+            map[i][(8 * number) + j] = 'X';
+    }
+    cur = cur->next;
+  }
+
+  for(i = 0; i < 20; i ++) {
+    sprintf(buf, "%s\n", map[i]);
+    strcat(response, buf);
+  }
+}
+
+int get_user_key(LinkedList *head, int pos){
+  LinkedList *cur;
+
+  cur = head;
+  while(cur != NULL){
+    if(cur->idx == pos){
+      return cur->key;
+    }
+    cur = cur->next;
+  }
+
   return -1;
 }

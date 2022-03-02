@@ -15,6 +15,8 @@ class UserClient
 {
 private:
     char ttybuf[100];
+    MyState my_info;
+    Register basic_info;
 
     int getkey(void);
     void new_user_init(void);
@@ -26,6 +28,7 @@ public:
 
     bool mycarstate = false;
     bool want_quit = false;
+    char userdir[100];
 
     void get_tty(void);
     void set_cron_message(void);

@@ -2,8 +2,6 @@
 
 //global varriable
 key_t msg_key;
-MyState my_info;
-Register basic_info;
 
 UserClient::UserClient()
 {
@@ -108,6 +106,7 @@ SIGNUP:
         exit(1);
     }
     close(new_user_file);
+    printf("계속하시려면 아무키나 눌러주세요.\n");
     getchar();
 }
 
@@ -142,6 +141,8 @@ void UserClient::get_tty(void)
 
     int tty_file = open("ttybuf.txt", O_RDONLY);
 
+    memset(ttybuf, 0, sizeof(ttybuf));
+
     if(read(tty_file, ttybuf, sizeof(ttybuf)) == -1)
     {
         printf("프로그램 실행 에러 시스템을 종료합니다.\n");
@@ -151,17 +152,55 @@ void UserClient::get_tty(void)
     }
     close(tty_file);
     
+    for(int i=0; i<100; i++)
+    {
+        if(ttybuf[i] == '\n')
+        {
+            ttybuf[i] = '\0';
+            break;
+        }
+    }
+
     system("rm -f ttybuf.txt");
 }
 
 void UserClient::set_cron_message(void)
 {
-    system(" { crontab -l & echo \'* * * * * ./checkkey > /dev/pts/0 && echo -n 님이 주차하신지 > /dev/pts/0 && ./calculatetime > /dev/pts/0 && echo 분 지났습니다. > /dev/pts/0\'; } | crontab -");
+    system("g++ checkkey.cpp userclient.o -o checkkey");
+    system("g++ calculatetime.cpp userclient.o -o calculatetime");
+
+    char sysmessage[1000];
+
+    strcat(sysmessage, " { crontab -l & echo \'* * * * * ");
+    strcat(sysmessage, userdir);
+    strcat(sysmessage, "/checkkey ");
+    strcat(sysmessage, userdir);
+    strcat(sysmessage, " > ");
+    strcat(sysmessage, ttybuf);
+    strcat(sysmessage, " && echo -n 님이 주차하신지 > ");
+    strcat(sysmessage, ttybuf);
+    strcat(sysmessage, " && ");
+    strcat(sysmessage, userdir);
+    strcat(sysmessage, "/calculatetime ");
+    strcat(sysmessage, userdir);
+    strcat(sysmessage, " > ");
+    strcat(sysmessage, ttybuf);
+    strcat(sysmessage, " && echo 분 지났습니다. > ");
+    strcat(sysmessage, ttybuf);
+    strcat(sysmessage, "\'; } | crontab -");
+    printf("%s\n", sysmessage);
+    system(sysmessage);
 }
 
 void UserClient::delete_cron_message(void)
 {
-    system(" crontab -l | grep -v '/dev/pts/0' | crontab -");
+    char sysmessage[1000];
+
+    strcat(sysmessage, " crontab -l | grep -v ");
+    strcat(sysmessage, ttybuf);
+    strcat(sysmessage, " | crontab -");
+    //system(sysmessage);
+    //system(" crontab -l | grep -v '/dev/pts/0' | crontab -");
 }
 
 void UserClient::client_process_setup(void)
@@ -217,6 +256,9 @@ void UserClient::client_process_setup(void)
         exit(1);
     }
 
+    memset(userdir, 0, sizeof(userdir));
+    getcwd(userdir, 100);
+
     if(my_info.state == 1)
         mycarstate = true;
     else
@@ -255,7 +297,6 @@ void UserClient::parkingin(void)
     if(my_info.errno == REQ_SUCCESS)
     {
         printf("%s 자동차가 %ld에 입차가 완료되었습니다.\n", my_info.car_number, my_info.unixtime);
-        set_cron_message();
     } 
     else
     {
@@ -267,6 +308,7 @@ void UserClient::parkingin(void)
     mycarstate = false;
     save_time_file();
 ENDIN:
+    return;
 }
 
 void UserClient::parkingout(void)
@@ -305,6 +347,7 @@ void UserClient::parkingout(void)
     if(my_info.errno == REQ_SUCCESS)
     {
         printf("%s 자동차가 %ld에 출차가 완료되었습니다.\n", my_info.car_number, my_info.unixtime);
+        printf("주차요금은 %d입니다. 이용해주셔서 감사합니다.\n", my_info.cost);
     } 
     else
     {
@@ -314,5 +357,6 @@ void UserClient::parkingout(void)
     }
 
     mycarstate = true;
-ENDOUT;
+ENDOUT:
+    return;
 }

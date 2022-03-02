@@ -20,7 +20,8 @@ int main(int argc, char *argv[])
         else
             user_client.parkingout();
     }
-
-    user_client.set_cron_message();
+    
+    if(user_client.mycarstate == 0)
+        user_client.set_cron_message();
     return 0;
 }

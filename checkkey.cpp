@@ -1,8 +1,13 @@
 #include "userclient.h"
 
-int main()
+int main(int argc, char *argv[])
 {
-    int user_key_file = open("key.txt", O_RDONLY);
+    char filename[100];
+    memset(filename, 0, sizeof(filename));
+    strcat(filename, argv[1]);
+    strcat(filename, "/key.txt");
+
+    int user_key_file = open(filename, O_RDONLY);
     
     char keybuf[100];
 

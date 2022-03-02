@@ -1,9 +1,14 @@
 #include "userclient.h"
 #include <time.h>
 
-int main()
+int main(int argc, char *argv[])
 {
-    int user_time_file = open("utime.txt", O_RDONLY);
+    char filename[100];
+    memset(filename, 0, sizeof(filename));
+    strcat(filename, argv[1]);
+    strcat(filename, "/utime.txt");
+
+    int user_time_file = open(filename, O_RDONLY);
     
     char timebuf[100];
 

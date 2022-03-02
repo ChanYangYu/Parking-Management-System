@@ -70,7 +70,7 @@ void parking_history(){
       exit(1);
     }
     system("clear");
-    if(state_buf.errno == REQ_SUCCESS){
+    if(state_buf.errno == REQ_FAIL){
       printf("-----------------------------------------------\n");
       printf("%s\n",manage_buf.response);
       printf("-----------------------------------------------\n");

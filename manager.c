@@ -180,14 +180,55 @@ void find_name_number(){
     printf("잘못된 번호를 입력하셨거나, 없는 사용자입니다.\n");
 }
 
+
+FILE* make_password(){
+  FILE *fp;
+  char password[BUFFER_SIZE];
+
+  if((fp = fopen(".passwd", "a+")) == NULL){
+    fprintf(stderr, "fopen() error\n");
+    exit(1);
+  }
+  
+  printf("새로운 관리자 비밀번호를 입력해주세요 : ");
+  scanf("%s", password);
+
+  fprintf(fp,"%s", password);
+  return fp;
+}
+
+void get_password(char* password){
+  FILE *fp;
+
+  if((fp = fopen(".passwd", "r")) == NULL)
+    fp = make_password();
+  
+  fscanf(fp, "%s", password);
+}
+
+void check_password(char *password){
+  char input[BUFFER_SIZE];
+
+  get_password(password);
+  printf("비밀번호를 입력해주세요 : ");
+  scanf("%s", input);
+
+  if(strcmp(password, input) != 0){
+    fprintf(stderr, "Error : 비밀번호가 틀렸습니다.\n");
+    exit(1);
+  }
+  system("clear");
+}
+
 int main()
 {
+  char password[BUFFER_SIZE];
+
+  check_password(password);
   if((key = msgget((key_t)MSG_QUEUE_KEY, IPC_CREAT | MSG_PERM)) == -1){
     fprintf(stderr,"Error: msgget() error\n");
     exit(1);
   }
-
-  printf("Key is %d\n", key);
 
   while(1){
     int button;

@@ -8,7 +8,6 @@
 #define NAME_SIZE 64
 #define CAR_NUMBER_SIZE 16
 #define PHONE_NUMBER_SIZE 16
-#define MAP_SIZE 1024
 #define RESPONSE_SIZE 4096
 #define BUFFER_SIZE 256
 
@@ -64,7 +63,7 @@ typedef struct MyState {
     int user_key;                     //key
     char car_number[CAR_NUMBER_SIZE]; //자동차번호
     int state;                        //주차여부
-    char map[MAP_SIZE];               //주차위치
+    char map[RESPONSE_SIZE];               //주차위치
     time_t unixtime;                  //입차시간
     int cost;                         //주차요금
     int errno;                        //에러코드

@@ -14,7 +14,7 @@ void get_car_number(JSON_Value* root_value, MyState* state_buf);
 int is_parking(LinkedList *head, int user_key);
 int get_log(char* file_name, char* response);
 int get_user_info(JSON_Value *root_value, Register *register_buf, int user_key);
-void get_map(LinkedList *head, char *response);
+void get_map(LinkedList *head, char *response, int pos);
 int get_user_key(LinkedList *head, int pos);
 
 #endif

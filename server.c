@@ -133,6 +133,7 @@ void process_in(key_t msg_key){
       state_buf.errno = REQ_SUCCESS;
       get_car_number(root_value, &state_buf);
       record_log(state_buf.car_number, 0);
+      get_map(head, state_buf.map, state_buf.user_key);
       //todo: state_buf->map 업데이트
     }
     else
@@ -178,7 +179,8 @@ void process_find_my_car(key_t msg_key)
     else
       state_buf.state = 1;
     
-   //todo: state_buf->map 업데이트
+    //todo: state_buf->map 업데이트
+    get_map(head, state_buf.map, state_buf.user_key);
     state_buf.errno = REQ_SUCCESS;
     state_buf.msgtype = MSG_CAR_STATE_RES;
     
@@ -248,7 +250,7 @@ void process_find_state(key_t msg_key){
   if(msgrcv(msg_key, (void *)&manage_buf, sizeof(Manage) - sizeof(long), MSG_FIND_CARS_REQ, IPC_NOWAIT) != -1){
     printf("[Find-State]\n");
   
-    get_map(head, manage_buf.response);
+    get_map(head, manage_buf.response, -1);
     manage_buf.errno = REQ_SUCCESS;
     manage_buf.msgtype = MSG_FIND_CARS_RES;
     

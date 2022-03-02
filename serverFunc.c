@@ -225,7 +225,7 @@ int get_user_info(JSON_Value *root_value, Register *register_buf, int user_key){
   return -1;
 }
 
-void get_map(LinkedList *head, char *response){
+void get_map(LinkedList *head, char *response, int pos){
   int i, j;
   int number = 15;
   LinkedList *cur;
@@ -258,6 +258,8 @@ void get_map(LinkedList *head, char *response){
   while(cur != NULL){
     number = cur->idx;
 
+    if(pos != -1 && cur->idx != pos)
+      continue;
     if(number < 11){
       number -= 1;
       for(i = 1; i <= 4; i++)

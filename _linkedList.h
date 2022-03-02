@@ -1,6 +1,6 @@
 #ifndef LINK_LIST_H
 #define LINK_LIST_H
-#define PARKING_LOT_SIZE 10
+#define PARKING_LOT_SIZE 20
 #include <stdlib.h>
 #include <time.h>
 #include "_ipc.h"

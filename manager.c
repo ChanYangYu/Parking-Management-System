@@ -231,7 +231,7 @@ void find_name_number(){
 }
 
 
-FILE* make_password(){
+void make_password(){
   FILE *fp;
   char password[BUFFER_SIZE];
 
@@ -244,28 +244,35 @@ FILE* make_password(){
   scanf("%s", password);
 
   fprintf(fp,"%s", password);
-  return fp;
+  fclose(fp);
 }
 
-void get_password(char* password){
+// 0: 신규 비밀번호, 1: 기존 비밀번호
+int get_password(char* password){
   FILE *fp;
 
-  if((fp = fopen(".passwd", "r")) == NULL)
-    fp = make_password();
-  
-  fscanf(fp, "%s", password);
+  if((fp = fopen(".passwd", "r")) == NULL){
+    make_password();
+    return 0;
+  }
+  else{
+    fscanf(fp, "%s", password);
+    fclose(fp);
+    return 1;
+  }
 }
 
 void check_password(char *password){
   char input[BUFFER_SIZE];
 
-  get_password(password);
-  printf("비밀번호를 입력해주세요 : ");
-  scanf("%s", input);
+  if(get_password(password) == 1){
+    printf("비밀번호를 입력해주세요 : ");
+    scanf("%s", input);
 
-  if(strcmp(password, input) != 0){
-    fprintf(stderr, "Error : 비밀번호가 틀렸습니다.\n");
-    exit(1);
+    if(strcmp(password, input) != 0){
+      fprintf(stderr, "Error : 비밀번호가 틀렸습니다.\n");
+      exit(1);
+    }
   }
   system("clear");
 }
@@ -283,7 +290,7 @@ int main()
   while(1){
     int button;
     system("cat manager_title");
-    printf("1. 주차현황 조회\n2. 주차이력 조회\n3. 입주민 업데이트\n4. 이용자 전체조회\n5. 입주민 보류자 조회\n6. 차주 및 연락처 조회\n: ");
+    printf("1. 주차현황 조회\n2. 주차이력 조회\n3. 입주민 업데이트\n4. 이용자 전체조회\n5. 입주민 보류자 조회\n6. 차주 및 연락처 조회\n9. 종료\n: ");
     scanf("%d", &button);
 
     system("clear");
@@ -295,6 +302,7 @@ int main()
       case 4: user_list_all();break;
       case 5: user_list_pen();break;
       case 6: find_name_number();break;
+      case 9: exit(0);break;
       default: fprintf(stderr, "Error : 잘못입력하셨습니다.\n");break;
     }
   }

@@ -112,7 +112,7 @@ SIGNUP:
 
 void UserClient::print_parking_map(void)
 {
-    printf("\n\n주차장 사진\n\n");
+    printf("\n\n%s\n\n", my_info.map);
 }
 
 void UserClient::save_time_file(void)

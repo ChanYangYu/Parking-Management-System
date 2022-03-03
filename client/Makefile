@@ -1,6 +1,6 @@
 CPP = g++
 FLAGS = $(OFLAGS) -L"/usr/lib" bin/linux-gcc-32/libIrrKlang.so -lglut -lGL -lGLU
-FLAGS2 = $(OFLAGS) -L"/usr/lib" bin/linux-gcc-64/libIrrKlang.so -lglut -lGL -lGLU
+FLAGS2 = $(OFLAGS) -L"/usr/lib" bin/linux-gcc-64/libIrrKlang.so -lglut -lGL -lGLU -pthread
 OFLAGS = -I"include"
 
 32: userclient.o

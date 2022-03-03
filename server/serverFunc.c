@@ -75,7 +75,7 @@ int make_user_list(JSON_Value* root_value, char* response, int flag){
     strcpy(phone_number, json_object_get_string(user_object, "phoneNumber"));
 
     is_resident = (int)json_object_get_number(user_object, "isResident");
-    sprintf(line,"%-10s %-16s %-15s %s\n", name, car_number, "010-9968-1949", resident_state[is_resident]);
+    sprintf(line,"%-6s  %-8s \t%-11s \t%s\n", name, car_number, phone_number, resident_state[is_resident]);
     // All
     if(flag == 0)
       strcat(response, line);
@@ -198,6 +198,7 @@ int get_log(char* file_name, char* response)
 
   memset(response, 0, sizeof(RESPONSE_SIZE));
   while(!feof(fp)){
+    memset(buffer, 0, sizeof(buffer));
     fgets(buffer, sizeof(buffer), fp);
   
     if(RESPONSE_SIZE - 100 > log_size)

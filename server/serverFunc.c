@@ -238,7 +238,7 @@ int get_user_info(JSON_Value *root_value, Register *register_buf, int user_key){
 void get_map(LinkedList *head, char *response, int key){
   int i, j;
   int half = PARKING_LOT_SIZE / 2;
-  int number = 15;
+  int number;
   LinkedList *cur;
   char buf[BUFFER_SIZE];
   char map[20][BUFFER_SIZE-1] = {
@@ -290,6 +290,17 @@ void get_map(LinkedList *head, char *response, int key){
   for(i = 0; i < 20; i ++) {
     sprintf(buf, "%s\n", map[i]);
     strcat(response, buf);
+  }
+}
+
+void get_map_for_GL(LinkedList *head, char *response){
+  LinkedList *cur;
+  
+  memset(response, 0, sizeof(RESPONSE_SIZE));
+  cur = head;
+  while(cur != NULL){
+    response[cur->idx] = 1;
+    cur = cur->next;
   }
 }
 

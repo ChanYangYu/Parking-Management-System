@@ -33,6 +33,7 @@ private:
     irrklang::ISoundSource* sound_src_sys_e = nullptr;
 
     int getkey(void);
+    bool checkphonenumber(void);
     void new_user_init(void);
     void print_parking_map(void);
     void save_time_file(void);

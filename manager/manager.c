@@ -11,24 +11,6 @@ MyState state_buf;
 key_t key;
 
 
-// int _gets(char *buf, int size){
-//   char ch;
-//   int i = 0;
-//   int res = 0;
-
-//   while((ch = getchar()) != '\n'){
-//     if(i >= size)
-//       continue;
-//     buf[i] = ch;
-//     i++;
-//   }
-//   if(i == size)
-//     buf[i-1] = '\0';
-//   else
-//     buf[i] = '\0';
-//   return 0;
-// }
-
 int get_number(char *input_str){
   char buffer[BUFFER_SIZE];
   int i, num = 0, check;
@@ -103,10 +85,8 @@ void current_parking_state(){
 
 void parking_history(){
   int history_select_number;
-  
-  //printf("1.통합 이력 조회\n2.개인 이력 조회\n:");
-  history_select_number = get_number("1.통합 이력 조회\n2.개인 이력 조회\n:");
 
+  history_select_number = get_number("1.통합 이력 조회\n2.개인 이력 조회\n:");
   if(history_select_number == 1){ 
     state_buf.msgtype = MSG_FIND_ALL_HISTORY_REQ;     
     if(msgsnd(key, (void *)&state_buf, sizeof(MyState) - sizeof(long), 0) == -1){
@@ -119,7 +99,7 @@ void parking_history(){
       exit(1);
     }
     system("clear");
-    if(state_buf.errno == REQ_FAIL){
+    if(manage_buf.errno == REQ_SUCCESS){
       printf("-----------------------------------------------\n");
       printf("%s\n",manage_buf.response);
       printf("-----------------------------------------------\n");
@@ -180,7 +160,6 @@ void user_list_all(){
     exit(1);
   }
 
-  system("clear");
   if(manage_buf.errno == REQ_SUCCESS){
     printf("------------------------------------------------\n");
     printf("%s\n",manage_buf.response);

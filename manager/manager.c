@@ -4,11 +4,62 @@
 #include <stdlib.h>
 #include "_ipc.h"
 
+#define NUM_MAX 200000000
 Register register_buf;
 Manage manage_buf;
 MyState state_buf;
 key_t key;
 
+
+// int _gets(char *buf, int size){
+//   char ch;
+//   int i = 0;
+//   int res = 0;
+
+//   while((ch = getchar()) != '\n'){
+//     if(i >= size)
+//       continue;
+//     buf[i] = ch;
+//     i++;
+//   }
+//   if(i == size)
+//     buf[i-1] = '\0';
+//   else
+//     buf[i] = '\0';
+//   return 0;
+// }
+
+int get_number(char *input_str){
+  char buffer[BUFFER_SIZE];
+  int i, num = 0, check;
+
+  while(1){
+    printf("%s", input_str);
+    fgets(buffer, sizeof(buffer), stdin);
+    buffer[strlen(buffer) - 1] = '\0';
+
+    check = 1;
+    for(i = 0; buffer[i] != '\0'; i++){
+      if(num * 10 > NUM_MAX){
+        printf("\n[!] 숫자 범위를 초과했습니다.\n");
+        check = 0;
+        num = 0;
+        break;
+      }
+      if(buffer[i] < '0' || buffer[i] > '9'){
+        printf("\n[!] 숫자만 입력해주세요.\n");
+        check = 0;
+        num = 0;
+        break;
+      }
+      num = num*10 + buffer[i] - '0';
+    }
+    if(check)
+      break;
+  }
+  
+  return num;
+}
 void current_parking_state(){
   
   manage_buf.msgtype = MSG_FIND_CARS_REQ;
@@ -29,8 +80,7 @@ void current_parking_state(){
     printf("[!] 주차현황 조회에 실패했습니다.\n");
     printf("-----------------------------------------------\n");
   }
-  printf("정보를 조회하고 싶은 차량의 주차장 번호를 입력하세요: ");
-  scanf("%d", &manage_buf.pos);
+  manage_buf.pos = get_number("정보를 조회하고 싶은 차량의 주차장 번호를 입력하세요: ");
 
   manage_buf.msgtype = MSG_FIND_CARS_DETAIL_REQ;
   if(msgsnd(key, (void *)&manage_buf, sizeof(Manage) - sizeof(long), 0) == -1){
@@ -42,7 +92,6 @@ void current_parking_state(){
     fprintf(stderr,"Error: msgrcv() error\n");
     exit(1);
   }
-  
   system("clear");
   printf("-----------------------------------------------\n");
   if(register_buf.errno == REQ_SUCCESS)
@@ -55,8 +104,8 @@ void current_parking_state(){
 void parking_history(){
   int history_select_number;
   
-  printf("1.통합 이력 조회\n2.개인 이력 조회\n:");
-  scanf("%d", &history_select_number);
+  //printf("1.통합 이력 조회\n2.개인 이력 조회\n:");
+  history_select_number = get_number("1.통합 이력 조회\n2.개인 이력 조회\n:");
 
   if(history_select_number == 1){ 
     state_buf.msgtype = MSG_FIND_ALL_HISTORY_REQ;     
@@ -84,7 +133,8 @@ void parking_history(){
   
   else if(history_select_number == 2){
     printf("차량 번호를 입력해주세요 : ");
-    scanf("%s", state_buf.car_number);
+    fgets(state_buf.car_number, sizeof(state_buf.car_number), stdin);
+    state_buf.car_number[strlen(state_buf.car_number) - 1] = '\0';
 
     state_buf.msgtype = MSG_FIND_USER_HISTORY_REQ;     
     if(msgsnd(key, (void *)&state_buf, sizeof(MyState) - sizeof(long), 0) == -1){
@@ -174,9 +224,16 @@ void update_user(){
   register_buf.msgtype = MSG_UPDATE_REQ;
   
   printf("차량 번호를 입력해주세요 : ");
-  scanf("%s", register_buf.car_number);
-  printf("입주자 인지 확인해주세요.\n(외부인 = 0 ,입주민 = 2)\n: ");
-  scanf("%d", &register_buf.is_resident);
+  fgets(register_buf.car_number, sizeof(register_buf.car_number), stdin);
+  register_buf.car_number[strlen(register_buf.car_number) - 1] = '\0';
+
+  while(1){
+    register_buf.is_resident = get_number("입주자 인지 확인해주세요.\n(외부인 = 0 ,입주민 = 2)\n: ");
+    if(register_buf.is_resident == 0 || register_buf.is_resident == 2)
+      break;
+    else
+      printf("\n[!] 잘못된 번호입니다.\n");
+  }
   
   if(msgsnd(key, (void *)&register_buf, sizeof(Register) - sizeof(long), 0) == -1){
     fprintf(stderr,"Error: msgsnd() error\n");
@@ -204,7 +261,8 @@ void update_user(){
 void find_name_number(){
   
   printf("검색하고 싶은 차량 번호를 입력하세요 : ");
-  scanf("%s", register_buf.car_number);
+  fgets(register_buf.car_number, sizeof(register_buf.car_number), stdin);
+  register_buf.car_number[strlen(register_buf.car_number) - 1] = '\0';
 
   register_buf.msgtype = MSG_FIND_CAR_NUMBER_REQ;
   if(msgsnd(key, (void *)&register_buf, sizeof(Register) - sizeof(long), 0) == -1){
@@ -241,7 +299,8 @@ void make_password(){
   }
   
   printf("새로운 관리자 비밀번호를 입력해주세요 : ");
-  scanf("%s", password);
+  fgets(password, BUFFER_SIZE, stdin);
+  password[strlen(password) - 1] = '\0';
 
   fprintf(fp,"%s", password);
   fclose(fp);
@@ -267,7 +326,8 @@ void check_password(char *password){
 
   if(get_password(password) == 1){
     printf("비밀번호를 입력해주세요 : ");
-    scanf("%s", input);
+    fgets(input, BUFFER_SIZE, stdin);
+    input[strlen(input) - 1] = '\0';
 
     if(strcmp(password, input) != 0){
       fprintf(stderr, "Error : 비밀번호가 틀렸습니다.\n");
@@ -290,8 +350,7 @@ int main()
   while(1){
     int button;
     system("cat manager_title");
-    printf("1. 주차현황 조회\n2. 주차이력 조회\n3. 입주민 업데이트\n4. 이용자 전체조회\n5. 입주민 보류자 조회\n6. 차주 및 연락처 조회\n9. 종료\n: ");
-    scanf("%d", &button);
+    button = get_number("1. 주차현황 조회\n2. 주차이력 조회\n3. 입주민 업데이트\n4. 이용자 전체조회\n5. 입주민 보류자 조회\n6. 차주 및 연락처 조회\n9. 종료\n: ");
 
     system("clear");
     
@@ -303,7 +362,7 @@ int main()
       case 5: user_list_pen();break;
       case 6: find_name_number();break;
       case 9: exit(0);break;
-      default: fprintf(stderr, "Error : 잘못입력하셨습니다.\n");break;
+      default: fprintf(stderr, "[!] 잘못입력하셨습니다.\n");break;
     }
   }
   

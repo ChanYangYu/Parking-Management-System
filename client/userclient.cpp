@@ -138,6 +138,8 @@ SIGNUP:
     getchar();
     printf("계속하시려면 아무키나 눌러주세요.\n");
     char keyboardbuf = getkey();
+    if(keyboardbuf == 27)
+        __fpurge(stdin);
     engine->stopAllSounds();
 }
 
@@ -249,7 +251,7 @@ void UserClient::set_cron_message(void)
     strcat(sysmessage, userdir);
     strcat(sysmessage, " > ");
     strcat(sysmessage, ttybuf);
-    strcat(sysmessage, " && echo -n 님이 주차하신지 > ");
+    strcat(sysmessage, " && echo -n 번님이 주차하신지 > ");
     strcat(sysmessage, ttybuf);
     strcat(sysmessage, " && ");
     strcat(sysmessage, userdir);
@@ -344,6 +346,8 @@ void UserClient::parkingin(void)
     system("clear");
     printf("입차 화면입니다.\n입차를 원하시면 아무키나 눌러주세요...\n(시스템 종료를 원하시면 q를 눌러주세요)\n");
     char keyboardbuf = getkey();
+    if(keyboardbuf == 27)
+        __fpurge(stdin);
     engine->stopAllSounds();
     if(keyboardbuf == 'q')
     {
@@ -377,11 +381,13 @@ void UserClient::parkingin(void)
         
         printf("자동으로 출차시스템으로 연결하시려면 아무키나 눌러주세요...\n(시스템 종료를 원하시면 q를 눌러주세요)\n");
         keyboardbuf = getkey();
+        if(keyboardbuf == 27)
+            __fpurge(stdin);
         engine->stopAllSounds();
         if(keyboardbuf == 'q')
         {
             want_quit = true;
-            goto ENDIN;
+            goto CHANGESATEENDIN;
         }
     } 
     else
@@ -390,7 +396,7 @@ void UserClient::parkingin(void)
         fprintf(stderr,"Error abnormal parkingin.\n");
         exit(1);
     }
-
+CHANGESATEENDIN:
     mycarstate = false;
     save_time_file();
 ENDIN:
@@ -408,6 +414,8 @@ void UserClient::parkingout(void)
     print_parking_map();
     printf("출차 화면입니다.\n출차를 원하시면 아무키나 눌러주세요...\n(시스템 종료를 원하시면 q를 눌러주세요)\n");
     char keyboardbuf = getkey();
+    if(keyboardbuf == 27)
+        __fpurge(stdin);
     engine->stopAllSounds();
 
     if(keyboardbuf == 'q')
@@ -444,11 +452,13 @@ void UserClient::parkingout(void)
 
         printf("자동으로 입차시스템으로 연결하시려면 아무키나 눌러주세요...\n(시스템 종료를 원하시면 q를 눌러주세요)\n");
         keyboardbuf = getkey();
+        if(keyboardbuf == 27)
+            __fpurge(stdin);
         engine->stopAllSounds();
         if(keyboardbuf == 'q')
         {
             want_quit = true;
-            goto ENDOUT;
+            goto CHANGESATEENDOUT;
         }
     } 
     else
@@ -457,7 +467,7 @@ void UserClient::parkingout(void)
         fprintf(stderr,"Error abnormal parkingout.\n");
         exit(1);
     }
-
+CHANGESATEENDOUT:
     mycarstate = true;
 ENDOUT:
     return;
@@ -470,6 +480,7 @@ void UserClient::finish_sound_src()
     printf("저희 시스템을 사용해주셔서 감사합니다.\n아무키나 눌러주세요...\n");
 
     char keyboardbuf = getkey();
+    
     engine->stopAllSounds();
 
     engine->drop();

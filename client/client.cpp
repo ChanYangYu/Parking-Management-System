@@ -15,7 +15,7 @@ int main(int argc, char *argv[])
         if(user_client.want_quit == true)
             break;
 
-        if(user_client.mycarstate == 1)
+        if(user_client.mycarstate == true)
             user_client.parkingin();
         else
             user_client.parkingout();
@@ -23,7 +23,7 @@ int main(int argc, char *argv[])
 
     user_client.finish_sound_src();
 
-    if(user_client.mycarstate == 0)
+    if(user_client.mycarstate == false)
 	    user_client.set_cron_message();
     
     system("clear");

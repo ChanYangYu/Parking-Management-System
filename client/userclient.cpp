@@ -1,11 +1,65 @@
 #include "userclient.h"
 
+#define STB_IMAGE_IMPLEMENTATION
+#include "include/stb_image.h"
+
 //global varriable
+int argc;
+char** argv;
+pid_t pid;
+
+MyState my_info;
 key_t msg_key;
-  
+
+unsigned char* PBG;
+int bgwidth;
+int bgheight;
+int bgchannels;
+
+unsigned char* MYCAR;
+int carwidth;
+int carheight;
+int carchannels;
+
+unsigned char* NOTMYCAR;
+int ncarwidth;
+int ncarheight;
+int ncarchannels;
+
+
+double locate_car[12][2];
+
+GLuint bgtexture;
+GLuint mycartexture;
+GLuint notmycartexture;
+
 UserClient::UserClient()
 {
     // Constructor
+    locate_car[0][0] = -0.69;
+    locate_car[0][1] = 0.45;
+    locate_car[1][0] = -0.41;
+    locate_car[1][1] = 0.45;
+    locate_car[2][0] = -0.14;
+    locate_car[2][1] = 0.45;
+    locate_car[3][0] = 0.135;
+    locate_car[3][1] = 0.45;
+    locate_car[4][0] = 0.41;
+    locate_car[4][1] = 0.45;
+    locate_car[5][0] = -0.69;
+    locate_car[5][1] = 0.685;
+    locate_car[6][0] = -0.69;
+    locate_car[6][1] = -0.65;
+    locate_car[7][0] = -0.41;
+    locate_car[7][1] = -0.65;
+    locate_car[8][0] = -0.14;
+    locate_car[8][1] = -0.65;
+    locate_car[9][0] = 0.135;
+    locate_car[9][1] = -0.65;
+    locate_car[10][0] = 0.41;
+    locate_car[10][1] = -0.65;
+    locate_car[11][0] = -0.69;
+    locate_car[11][1] = -0.65;
 
     engine = irrklang::createIrrKlangDevice();
     if(!engine)
@@ -30,6 +84,30 @@ UserClient::UserClient()
     sound_src_cout_s->setDefaultVolume(1.0f);
     sound_src_cout_e->setDefaultVolume(1.0f);
     sound_src_sys_e->setDefaultVolume(1.0f);
+
+
+    PBG = stbi_load(parking_bg_image_path, &bgwidth, &bgheight, &bgchannels, 4);
+    if (!PBG)
+    {
+        printf("프로그램 실행 에러 시스템을 종료합니다.\n");
+        fprintf(stderr,"Error can't find texture image.\n");
+        exit(1);
+    }
+    MYCAR = stbi_load(car_image_path, &carwidth, &carheight, &carchannels, 4);
+    if (!MYCAR)
+    {
+        printf("프로그램 실행 에러 시스템을 종료합니다.\n");
+        fprintf(stderr,"Error can't find texture image.\n");
+        exit(1);
+    }
+    NOTMYCAR = stbi_load(other_car_image_path, &ncarwidth, &ncarheight, &ncarchannels, 4);
+    if (!NOTMYCAR)
+    {
+        printf("프로그램 실행 에러 시스템을 종료합니다.\n");
+        fprintf(stderr,"Error can't find texture image.\n");
+        exit(1);
+    }
+
 }
 
 int UserClient::getkey(void)
@@ -173,53 +251,141 @@ SIGNUP:
     engine->stopAllSounds();
 }
 
-void drawPoints()
+//내부 GL 함수
+
+void init_texture()
+{
+    glEnable(GL_TEXTURE_2D);
+    glGenTextures(1, &bgtexture);
+    glBindTexture(GL_TEXTURE_2D, bgtexture);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, bgwidth, bgheight, 0, GL_RGBA, GL_UNSIGNED_BYTE, PBG);
+}
+
+void drawBG()
 {
 	glClear(GL_COLOR_BUFFER_BIT);
-	glColor3f(1.0, 1.0, 1.0);
 	glBegin(GL_POLYGON);
-	glVertex2f(-0.5, 0.0);
-	glVertex2f(0.5, 0.0);
-	glVertex2f(0.0, 1.0);
+    glTexCoord2d(0.0, 1.0f);      glVertex3d(-1.0f, -1.0f, 0.0);
+    glTexCoord2d(0.0, 0.0);      glVertex3d(-1.0f, 1.0f, 0.0);
+    glTexCoord2d(1.0f, 0.0);      glVertex3d(1.0f, 1.0f, 0.0);
+    glTexCoord2d(1.0f, 1.0f);      glVertex3d(1.0f, -1.0f, 0.0);
 	glEnd();
 	glFlush();
 }
 
-pid_t pid;
+void init_texture_car()
+{
+    glGenTextures(1, &mycartexture);
+    glBindTexture(GL_TEXTURE_2D, mycartexture);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, carwidth, carheight, 0, GL_RGBA, GL_UNSIGNED_BYTE, MYCAR);
+}
+
+void init_texture_othercar()
+{
+    glGenTextures(1, &notmycartexture);
+    glBindTexture(GL_TEXTURE_2D, notmycartexture);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, ncarwidth, ncarheight, 0, GL_RGBA, GL_UNSIGNED_BYTE, NOTMYCAR);
+}
+
+void drawCAR(int mycar_where)
+{
+    double a = locate_car[mycar_where][0];
+    double b = locate_car[mycar_where][1];
+    glBegin(GL_POLYGON);
+    glTexCoord2d(0.0, 1.0f);      glVertex3d((-0.13 +a) * 1.0f, (-0.35 +b) * 1.0f, 0.0);
+    glTexCoord2d(0.0, 0.0);      glVertex3d((-0.13 +a) * 1.0f, (0.35 +b) * 1.0f, 0.0);
+    glTexCoord2d(1.0f, 0.0);      glVertex3d((0.13 +a) * 1.0f, (0.35 +b) * 1.0f, 0.0);
+    glTexCoord2d(1.0f, 1.0f);      glVertex3d((0.13 +a) * 1.0f, (-0.35 +b) * 1.0f, 0.0);
+	glEnd();
+	glFlush();
+}
+
+void reshape(GLint w, GLint h)
+{
+    glViewport(0, 0, w, h);
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    glOrtho(-1.0, 1.0, -1.0, 1.0, -1.0, 30.0);
+}
 
 void keyboard(unsigned char key, int x, int y)
 {
-	switch(key){
+	switch(key)
+    {
 		case 'q':
 			exit(pid);
+			break;
+        case 'Q':
+            exit(pid);
 			break;
 	}
 	glutPostRedisplay();
 }
 
+void display()
+{
+    glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    init_texture();
+    drawBG();
+
+    int mycar_where = 0;
+    int not_mycar_where[11];
+    memset(not_mycar_where, 0, sizeof(not_mycar_where));
+    int check = 0;
+
+    for(int i=0; i<12; i++)
+    {
+        if(my_info.map[i] == '1')
+            mycar_where == i;
+
+        if(my_info.map[i] == '2')
+        {
+            not_mycar_where[check] = i;
+            check++;
+        }
+    }
+
+    init_texture_car();
+    drawCAR(mycar_where);
+
+    init_texture_othercar();
+    for(int i=0; i<check; i++)
+    {
+        drawCAR(not_mycar_where[i]);
+    }
+    
+
+    glutSwapBuffers();
+}
+
 void UserClient::print_parking_map(void)
 {
-    printf("\n\n%s\n\n", my_info.map);
-    /*
     pid = fork();
+
     if(pid == 0)
     {
-	    printf("먼저 GL화면을 종료하시려면 q를 입력해주세요\n");
-    	int mode = GLUT_RGB | GLUT_SINGLE;
-    	int argc = 1;
-    	char **argv;
+        printf("\n잠시 기다리시면 그래픽 화면으로 주차된 자동차를 보실 수 있습니다.\n");
     	glutInit(&argc, argv);
-    	glutInitDisplayMode(mode);
-    	glutInitWindowPosition(100,100);
-    	glutInitWindowSize(400,400);
-    	glutCreateWindow("OpenGL");
-    	glutSetWindowTitle("exam");
+    	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
+        glutInitWindowSize(500,500);
+    	glutInitWindowPosition(200,100);
+    	glutCreateWindow("Parking lot");
+    	glutSetWindowTitle("Parking lot");;
+        glutReshapeFunc(reshape);
 
-    	glutDisplayFunc(drawPoints);
+        printf("먼저 그래픽 주차장 화면을 종료하시려면 q를 입력해주세요\n");
+    	glutDisplayFunc(display);
     	glutKeyboardFunc(keyboard);
     	glutMainLoop();
-    }
-    */
+    } 
 }
 
 void UserClient::save_time_file(void)
@@ -305,8 +471,10 @@ void UserClient::delete_cron_message(void)
     system(sysmessage2);
 }
 
-void UserClient::client_process_setup(void)
+void UserClient::client_process_setup(int margc, char** margv)
 {
+    argc = margc;
+    argv = margv;
     if((msg_key = msgget((key_t)MSG_QUEUE_KEY, IPC_CREAT | MSG_PERM)) == -1)
     {
         printf("프로그램 실행 에러 시스템을 종료합니다.\n");
@@ -408,7 +576,8 @@ void UserClient::parkingin(void)
         struct tm *tm;
         tm = localtime(&my_info.unixtime);
         printf("%s 자동차가 %d일 %d시 %d분 %d초에 입차가 완료되었습니다.\n", my_info.car_number, tm->tm_mday, tm->tm_hour, tm->tm_min, tm->tm_sec);
-        
+        printf("현재 [%d]님의 자동차의 주차위치\n", my_info.user_key);
+        printf("\n\n%s\n\n", my_info.map);
         printf("자동으로 출차시스템으로 연결하시려면 아무키나 눌러주세요...\n(시스템 종료를 원하시면 q를 눌러주세요)\n");
         keyboardbuf = getkey();
         if(keyboardbuf == 27)
@@ -440,7 +609,6 @@ void UserClient::parkingout(void)
     engine->stopAllSounds();
     engine->play2D(sound_src_cout_s);
     system("clear");
-    printf("현재 [%d]님의 자동차의 주차위치\n", my_info.user_key);
     print_parking_map();
     printf("출차 화면입니다.\n출차를 원하시면 아무키나 눌러주세요...\n(시스템 종료를 원하시면 q를 눌러주세요)\n");
     char keyboardbuf = getkey();

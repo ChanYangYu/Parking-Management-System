@@ -20,8 +20,11 @@ class UserClient
 {
 private:
     char ttybuf[100];
-    MyState my_info;
     Register basic_info;
+
+    const char* parking_bg_image_path = "textures/parking_bg.jpg";
+    const char* car_image_path = "textures/car.jpg";
+    const char* other_car_image_path = "textures/other_car.jpg";
 
     irrklang::ISoundEngine* engine;
     irrklang::ISoundSource* sound_src_regi_s = nullptr;
@@ -48,7 +51,7 @@ public:
     void get_tty(void);
     void set_cron_message(void);
     void delete_cron_message(void);
-    void client_process_setup(void);
+    void client_process_setup(int margc, char** margv);
     void parkingin(void);
     void parkingout(void);
     void finish_sound_src(void);

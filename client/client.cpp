@@ -2,12 +2,12 @@
 
 UserClient user_client;
 
-int main(int argc, char *argv[])
+int main(int argc, char** argv)
 {
     //setup
     user_client.get_tty();
     user_client.delete_cron_message();
-    user_client.client_process_setup();
+    user_client.client_process_setup(argc, argv);
 
     //loop
     while(1)

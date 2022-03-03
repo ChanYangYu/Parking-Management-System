@@ -48,6 +48,17 @@ int UserClient::getkey(void)
     return ch;
 }
 
+bool UserClient::checkphonenumber(void)
+{
+    for(int i=0; i<11; i++)
+    {
+        if(basic_info.phone_number[i] < 48 || basic_info.phone_number[i] > 57)
+            return false;
+        
+    }
+    return true;
+}
+
 void UserClient::new_user_init(void)
 {
 USERINIT:
@@ -55,35 +66,54 @@ USERINIT:
     system("clear");
     printf("처음 오신것을 환영합니다. 신규 주차관리 유저 등록화면입니다\n");
     printf("이름을 입력해 주세요 : ");
-    scanf("%s", basic_info.name);
+    fgets(basic_info.name, sizeof(basic_info.name), stdin);
+    basic_info.name[strlen(basic_info.name) - 1] = '\0';
+    __fpurge(stdin);
+
     printf("자동차 번호를 입력해 주세요 : ");
-    scanf("%s", basic_info.car_number);
-    printf("전화 번호를 주세요 : ");
-    scanf("%s", basic_info.phone_number);
- 
-    int numberbuf;
+    fgets(basic_info.car_number, sizeof(basic_info.car_number), stdin);
+    basic_info.car_number[strlen(basic_info.car_number) - 1] = '\0';
+    __fpurge(stdin);
+
+    printf("전화 번호를 입력해 주세요(11자리 숫자) : ");
+REGETPHONENUM:
+    fgets(basic_info.phone_number, sizeof(basic_info.phone_number), stdin);
+    basic_info.phone_number[strlen(basic_info.phone_number) - 1] = '\0';
+    __fpurge(stdin);
+
+    if(checkphonenumber() == false || strlen(basic_info.phone_number) != 11)
+    {
+        printf("잘못 입력하셨습니다. 전화 번호를 입력해 주세요(11자리 숫자) : ");
+        memset(basic_info.phone_number, 0, sizeof(basic_info.phone_number));
+        goto REGETPHONENUM;
+    }
+
+    char numberbuf;
     printf("입주민 여부를 입력해주세요(맞으시면 1, 틀리시면 0) : ");
-    scanf("%d", &numberbuf);
-    if(numberbuf != 0 && numberbuf != 1)
+
+    scanf("%c", &numberbuf);
+    __fpurge(stdin);
+    if(numberbuf != 48 && numberbuf != 49)
     {
         goto RETRYGETNUMBER;
     }
     else
     {
-        basic_info.is_resident = numberbuf;
+        basic_info.is_resident = numberbuf - 48;
         goto SIGNUP;
     }
 
 RETRYGETNUMBER:
     printf("잘못 입력하셨습니다. 입주민 여부를 입력해주세요(맞으시면 1, 틀리시면 0) : ");
-    scanf("%d", &numberbuf);
-    if(numberbuf != 0 && numberbuf != 1)
+    scanf("%c", &numberbuf);
+    __fpurge(stdin);
+    if(numberbuf != 48 && numberbuf != 49)
     {
         goto RETRYGETNUMBER;
     }
     else
     {
-        basic_info.is_resident = numberbuf;
+        basic_info.is_resident = numberbuf - 48;
     }
 
 SIGNUP:
@@ -135,7 +165,7 @@ SIGNUP:
         exit(1);
     }
     close(new_user_file);
-    getchar();
+    __fpurge(stdin);
     printf("계속하시려면 아무키나 눌러주세요.\n");
     char keyboardbuf = getkey();
     if(keyboardbuf == 27)

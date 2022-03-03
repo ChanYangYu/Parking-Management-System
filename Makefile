@@ -1,20 +1,14 @@
-all: server client manager
+32:
+	cd server; make
+	cd manager; make
+	cd client; make 32;
 
-GCC=g++
-CFLAGS= -Wall -c -g
-
-server: server.o serverFunc.o _parson.o _linkedList.o
-	$(CC) -o $@ $^
-
-client: client.o userclient.o 
-	$(CC) -o $@ $^
-
-manager: manager.o
-	$(CC) -o $@ $^
-.c.o:
-	$(CC) $(CFLAGS) $<
-.cpp.o:
-	$(CC) $(CFLAGS) $<
+64:
+	cd server; make
+	cd manager; make
+	cd client; make 64;
 
 clean:
-	rm -r *.o server client manager
+	cd server; make clean
+	cd manager; make clean
+	cd client; make clean

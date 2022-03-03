@@ -1,0 +1,15 @@
+server/*.o
+server/*.log
+server/server
+server/users.json
+
+client/*.o
+client/key.txt
+client/utime.txt
+client/client
+client/checkkey
+client/calculatetime
+
+manager/*.o
+manager/manager
+manager/.passwd

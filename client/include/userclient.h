@@ -14,6 +14,7 @@
 #include "GL/freeglut.h"
 #include "irrKlang/irrKlang.h"
 #include "conio.h"
+#include <stdio_ext.h>
 
 class UserClient
 {

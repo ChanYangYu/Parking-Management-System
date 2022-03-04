@@ -46,8 +46,9 @@ UserClient::UserClient()
     locate_car[3][1] = 0.45;
     locate_car[4][0] = 0.41;
     locate_car[4][1] = 0.45;
-    locate_car[5][0] = -0.69;
-    locate_car[5][1] = 0.685;
+    locate_car[5][0] = 0.685;
+    locate_car[5][1] = 0.45;
+    
     locate_car[6][0] = -0.69;
     locate_car[6][1] = -0.65;
     locate_car[7][0] = -0.41;
@@ -58,7 +59,7 @@ UserClient::UserClient()
     locate_car[9][1] = -0.65;
     locate_car[10][0] = 0.41;
     locate_car[10][1] = -0.65;
-    locate_car[11][0] = -0.69;
+    locate_car[11][0] = 0.685;
     locate_car[11][1] = -0.65;
 
     engine = irrklang::createIrrKlangDevice();
@@ -344,7 +345,7 @@ void display()
     for(int i=0; i<12; i++)
     {
         if(my_info.map[i] == '1')
-            mycar_where == i;
+            mycar_where = i;
 
         if(my_info.map[i] == '2')
         {

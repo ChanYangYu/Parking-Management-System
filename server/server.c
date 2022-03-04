@@ -134,8 +134,8 @@ void process_in(key_t msg_key){
       get_car_number(root_value, &state_buf);
       record_log(state_buf.car_number, 0);
       //todo: state_buf->map 업데이트
-      get_map(head, state_buf.map, state_buf.user_key);
-      //get_map_for_GL(head, state_buf.map);
+      //get_map(head, state_buf.map, state_buf.user_key);
+      get_map_for_GL(head, state_buf.map, state_buf.user_key);
     }
     else
       state_buf.errno = REQ_FAIL;
@@ -181,8 +181,8 @@ void process_find_my_car(key_t msg_key)
       state_buf.state = 1;
     
     //todo: state_buf->map 업데이트
-    get_map(head, state_buf.map, state_buf.user_key);
-    //get_map_for_GL(head, state_buf.map);
+    //get_map(head, state_buf.map, state_buf.user_key);
+    get_map_for_GL(head, state_buf.map, state_buf.user_key);
     state_buf.errno = REQ_SUCCESS;
     state_buf.msgtype = MSG_CAR_STATE_RES;
     

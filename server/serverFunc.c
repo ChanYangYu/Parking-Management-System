@@ -293,13 +293,22 @@ void get_map(LinkedList *head, char *response, int key){
   }
 }
 
-void get_map_for_GL(LinkedList *head, char *response){
+void get_map_for_GL(LinkedList *head, char *response, int key){
   LinkedList *cur;
-  
+
   memset(response, 0, sizeof(RESPONSE_SIZE));
   cur = head;
+  
   while(cur != NULL){
-    response[cur->idx] = 1;
+    // 0 ~ 11
+    int i = cur->idx - 1;
+
+    // My car
+    if(cur->key == key){
+      response[i] = 1;
+    }
+    else
+      response[i] = 2;
     cur = cur->next;
   }
 }

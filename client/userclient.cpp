@@ -48,18 +48,19 @@ UserClient::UserClient()
     locate_car[4][1] = 0.45;
     locate_car[5][0] = 0.685;
     locate_car[5][1] = 0.45;
+    
     locate_car[6][0] = -0.69;
-    locate_car[6][1] = -0.52;
+    locate_car[6][1] = -0.65;
     locate_car[7][0] = -0.41;
-    locate_car[7][1] = -0.52;
+    locate_car[7][1] = -0.65;
     locate_car[8][0] = -0.14;
-    locate_car[8][1] = -0.52;
+    locate_car[8][1] = -0.65;
     locate_car[9][0] = 0.135;
-    locate_car[9][1] = -0.52;
+    locate_car[9][1] = -0.65;
     locate_car[10][0] = 0.41;
-    locate_car[10][1] = -0.52;
+    locate_car[10][1] = -0.65;
     locate_car[11][0] = 0.685;
-    locate_car[11][1] = -0.52;
+    locate_car[11][1] = -0.65;
 
     engine = irrklang::createIrrKlangDevice();
     if(!engine)
@@ -343,10 +344,10 @@ void display()
 
     for(int i=0; i<12; i++)
     {
-        if(my_info.map[i] == 1)
+        if(my_info.map[i] == '1')
             mycar_where = i;
 
-        if(my_info.map[i] == 2)
+        if(my_info.map[i] == '2')
         {
             not_mycar_where[check] = i;
             check++;
@@ -577,8 +578,7 @@ void UserClient::parkingin(void)
         tm = localtime(&my_info.unixtime);
         printf("%s 자동차가 %d일 %d시 %d분 %d초에 입차가 완료되었습니다.\n", my_info.car_number, tm->tm_mday, tm->tm_hour, tm->tm_min, tm->tm_sec);
         printf("현재 [%d]님의 자동차의 주차위치\n", my_info.user_key);
-        //printf("\n\n%s\n\n", my_info.map);
-        print_parking_map();
+        printf("\n\n%s\n\n", my_info.map);
         printf("자동으로 출차시스템으로 연결하시려면 아무키나 눌러주세요...\n(시스템 종료를 원하시면 q를 눌러주세요)\n");
         keyboardbuf = getkey();
         if(keyboardbuf == 27)

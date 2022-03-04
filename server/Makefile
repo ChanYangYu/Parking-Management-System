@@ -9,4 +9,4 @@ server: server.o serverFunc.o _parson.o _linkedList.o
 	$(CC) $(CFLAGS) $^
 	
 clean:
-	rm -r *.o server
+	rm -r *.o server *.log 

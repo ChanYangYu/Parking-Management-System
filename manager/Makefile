@@ -7,4 +7,4 @@ manager: manager.o
 	$(CC) $(CFLAGS) $^
 	
 clean:
-	rm -r *.o manager
+	rm -r *.o manager .paswd

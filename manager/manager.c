@@ -272,14 +272,14 @@ void make_password(){
   FILE *fp;
   char password[BUFFER_SIZE];
 
+  printf("새로운 관리자 비밀번호를 입력해주세요 : ");
+  fgets(password, BUFFER_SIZE, stdin);
+  password[strlen(password) - 1] = '\0';
+  
   if((fp = fopen(".passwd", "a+")) == NULL){
     fprintf(stderr, "fopen() error\n");
     exit(1);
   }
-  
-  printf("새로운 관리자 비밀번호를 입력해주세요 : ");
-  fgets(password, BUFFER_SIZE, stdin);
-  password[strlen(password) - 1] = '\0';
 
   fprintf(fp,"%s", password);
   fclose(fp);

@@ -1,5 +1,4 @@
 #include "userclient.h"
-#include <time.h>
 
 int main(int argc, char *argv[])
 {
@@ -23,9 +22,11 @@ int main(int argc, char *argv[])
     int user_time = atoi(timebuf);
 
     user_time = time(NULL) - user_time;
-    user_time = user_time / 60; 
+    
+    int min_user_time = user_time / 60;
+    user_time = user_time % 60; 
 
-    printf("%d ", user_time);
+    printf(" %d분 %d초", min_user_time, user_time);
 
     close(user_time_file);
     return 0;

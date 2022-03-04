@@ -344,10 +344,10 @@ void display()
 
     for(int i=0; i<12; i++)
     {
-        if(my_info.map[i] == '1')
+        if(my_info.map[i] == 1)
             mycar_where = i;
 
-        if(my_info.map[i] == '2')
+        if(my_info.map[i] == 2)
         {
             not_mycar_where[check] = i;
             check++;

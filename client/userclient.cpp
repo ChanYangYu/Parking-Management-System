@@ -578,7 +578,7 @@ void UserClient::parkingin(void)
         tm = localtime(&my_info.unixtime);
         printf("%s 자동차가 %d일 %d시 %d분 %d초에 입차가 완료되었습니다.\n", my_info.car_number, tm->tm_mday, tm->tm_hour, tm->tm_min, tm->tm_sec);
         printf("현재 [%d]님의 자동차의 주차위치\n", my_info.user_key);
-        printf("\n\n%s\n\n", my_info.map);
+        print_parking_map();
         printf("자동으로 출차시스템으로 연결하시려면 아무키나 눌러주세요...\n(시스템 종료를 원하시면 q를 눌러주세요)\n");
         keyboardbuf = getkey();
         if(keyboardbuf == 27)

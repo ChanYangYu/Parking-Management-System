@@ -48,7 +48,6 @@ sudo apt-get install freeglut3-dev libglu1-mesa-dev mesa-common-dev
     cd client
     ./client
     ```
-    
 
 ## Directory
 
@@ -93,3 +92,6 @@ Linux version 5.13.0-30-generic
 (gcc (Ubuntu 9.3.0-17ubuntu1~20.04) 9.3.0,
 GNU ld (GNU Binutils for Ubuntu) 2.34)
 ```
+
+## Design
+![image](https://user-images.githubusercontent.com/55623688/156960470-7b48a6fc-e9a8-47ec-9f9f-a87ff450606a.png)
